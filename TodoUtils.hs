@@ -7,7 +7,7 @@ module TodoUtils
 , completeTodo
 ) where
 
-import Data.List (partition, sortBy)
+import Data.List (partition, sort)
 import Data.Char (toUpper)
 import qualified Data.Text as Text
 
@@ -17,16 +17,31 @@ instance Show Todo where
   show (Todo todoId todoText) = show todoId ++ " " ++ todoText
 
 instance Ord Todo where
-  compare t1 t2 = compare (priority t1) (priority t2)
+  compare t1 t2
+    | completed t1 && completed t2 = compare (priority t1) (priority t2)
+    | completed t1 = LT
+    | completed t2 = GT
+    | otherwise = compare (priority t1) (priority t2)
 
-type Priority = Maybe Char
+completed :: Todo -> Bool
+completed (Todo _ text) =
+  case text of
+    ('x':' ':_) -> True
+    _ -> False
+
+data Priority = None | Priority Char deriving (Eq)
+instance Ord Priority where
+  compare None _ = LT
+  compare (Priority _) None = GT
+  compare (Priority p1) (Priority p2) = flip compare p1 p2
 priority :: Todo -> Priority
+
 priority (Todo _ todoText) = -- FIXME: use regexpes...
   case priorityChar todoText of
     Just pri -> if pri `elem` ['A'..'E']
-                  then Just (toUpper pri)
-                  else Nothing
-    Nothing -> Nothing
+                  then Priority (toUpper pri)
+                  else None
+    Nothing -> None
   where
     priorityChar :: String -> Maybe Char
     priorityChar ('(':pri:')':_) = Just pri -- incomplete todo with priority
@@ -40,7 +55,7 @@ readTodoTxt todoTxt =
         blank = ([]==) . Text.unpack . Text.strip . Text.pack
 
 displayTodoTxt :: [Todo] -> String
-displayTodoTxt = unlines . map show . sortBy (flip compare)
+displayTodoTxt = unlines . map show . sort
 
 serialiseTodoTxt :: [Todo] -> String
 serialiseTodoTxt = unlines . map (\(Todo _ text) -> text)
@@ -64,5 +79,5 @@ completeTodo targetTodoId todoList =
                                            where complete todo@(Todo tId tText)
                                                      | completed todo = todo
                                                      | otherwise      = Todo tId ("x " ++ tText)
-                                                 completed (Todo _ ('x':' ':_)) = True
-                                                 completed (Todo _ _) = False
+
+
