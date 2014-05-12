@@ -35,13 +35,13 @@ add todo = do
   list
 
 remove :: Int -> IO ()
-remove targetTodoId = updateTodoTxtWith targetTodoId removeTodo
+remove = updateTodoTxtWith removeTodo
 
 complete :: Int -> IO ()
-complete targetTodoId = updateTodoTxtWith targetTodoId completeTodo
+complete = updateTodoTxtWith completeTodo
 
-updateTodoTxtWith :: Int -> (Int -> [Todo] -> (Maybe Todo, [Todo])) -> IO ()
-updateTodoTxtWith targetTodoId f = do
+updateTodoTxtWith :: (Int -> [Todo] -> (Maybe Todo, [Todo])) -> Int -> IO ()
+updateTodoTxtWith f targetTodoId = do
   contents <- readFile todoFile
   let todoTxt = readTodoTxt contents
   let (target, newTodoList) = f targetTodoId todoTxt
