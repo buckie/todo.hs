@@ -44,5 +44,9 @@ completeTodo targetTodoId todoList =
           (completedTodo, newTodoList) = case foundTodo of
                                            Just t -> (Just (complete t), todoListWithoutFoundTodo ++ [complete t])
                                            Nothing -> (Nothing, todoList)
-                                           where complete (Todo tId tText) = Todo tId ("x " ++ tText)
+                                           where complete todo@(Todo tId tText)
+                                                     | completed todo = todo
+                                                     | otherwise      = Todo tId ("x " ++ tText)
+                                                 completed (Todo _ ('x':' ':_)) = True
+                                                 completed (Todo _ _) = False
 
