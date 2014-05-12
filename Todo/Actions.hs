@@ -43,5 +43,3 @@ completeTodo targetTodoId todoList =
                                            where complete todo@(Todo tId tText)
                                                      | completed todo = todo
                                                      | otherwise      = Todo tId ("x " ++ tText)
-
-

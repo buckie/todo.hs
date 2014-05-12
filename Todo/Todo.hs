@@ -43,4 +43,3 @@ priority (Todo _ todoText) = -- FIXME: use regexpes...
     priorityChar ('(':pri:')':_) = Just pri -- incomplete todo with priority
     priorityChar ('x':' ':'(':pri:')':_) = Just pri -- complete todo with priority
     priorityChar _ = Nothing
-
