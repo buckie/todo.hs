@@ -2,7 +2,7 @@ import System.Environment (getArgs)
 import System.IO (openTempFile, hPutStr, hClose, hPutStr)
 import System.Directory (removeFile, renameFile)
 
-import todo
+import TodoUtils
 
 type TodoFile = FilePath
 todoFile :: TodoFile
@@ -16,10 +16,10 @@ dispatch ("list":[]) = list
 dispatch ("ls":[]) = list
 dispatch ("add":todo) = add $ unwords todo
 dispatch ("a":todo) = add $ unwords todo
-{-dispatch ("remove":tId:[]) = remove (read tId :: Int)-}
-{-dispatch ("rm":tId:[]) = remove (read tId :: Int)-}
-{-dispatch ("complete":tId:[]) = complete (read tId :: Int)-}
-{-dispatch ("do":tId:[]) = complete (read tId :: Int)-}
+dispatch ("remove":tId:[]) = remove (read tId :: Int)
+dispatch ("rm":tId:[]) = remove (read tId :: Int)
+dispatch ("complete":tId:[]) = complete (read tId :: Int)
+dispatch ("do":tId:[]) = complete (read tId :: Int)
 dispatch (invalidCommand:[]) = putStrLn $ "Command not recognized: " ++ invalidCommand
 dispatch _ = putStrLn "Command not recognized"
 
