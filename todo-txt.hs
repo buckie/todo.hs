@@ -23,26 +23,25 @@ remove = updateTodoTxtWith removeTodo
 complete :: Int -> IO ()
 complete = updateTodoTxtWith completeTodo
 
+updateTodoFile :: [Todo] -> IO ()
+updateTodoFile newTodoList = do
+  let newContents = serialiseTodoTxt newTodoList
+  (tempName, tempH) <- openTempFile "." "temp"
+  hPutStr tempH newContents
+  hClose tempH
+  removeFile todoFile
+  renameFile tempName todoFile
+
 updateTodoTxtWith :: (Int -> [Todo] -> (Maybe Todo, [Todo])) -> Int -> IO ()
 updateTodoTxtWith f targetTodoId = do
-
   contents <- readFile todoFile
   let todoTxt = readTodoTxt contents
   let (target, newTodoList) = f targetTodoId todoTxt
-
   case target of
-
     Just todo -> do
-      let newContents = serialiseTodoTxt newTodoList
-      (tempName, tempH) <- openTempFile "." "temp"
-      hPutStr tempH newContents
-      hClose tempH
-      removeFile todoFile
-      renameFile tempName todoFile
-
+      updateTodoFile newTodoList
       list
       putStrLn $ "Updated: " ++ show todo
-
     Nothing -> putStrLn $ "Cannot find todo #" ++ show targetTodoId
 
 dispatch :: [String] -> IO ()
