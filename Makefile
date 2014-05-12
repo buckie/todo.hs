@@ -1,5 +1,7 @@
 build:
+	make clean
 	ghc todo-txt.hs
+	make fake_todo
 
 clean:
 	rm -f *.o *.hi
