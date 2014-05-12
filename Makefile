@@ -1,5 +1,9 @@
+build:
+	ghc todo-txt.hs
+
 clean:
-	rm -f todo.o todo.hi todo
+	rm -f *.o *.hi
+	rm -f todo-txt t.txt
 
 fake_todo:
 	cp t.txt.sample t.txt

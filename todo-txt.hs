@@ -8,8 +8,6 @@ type TodoFile = FilePath
 todoFile :: TodoFile
 todoFile = "./t.txt"
 
--- Impure Kode
-
 dispatch :: [String] -> IO ()
 dispatch [] = list
 dispatch ("list":[]) = list
@@ -22,7 +20,6 @@ dispatch ("complete":tId:[]) = complete (read tId :: Int)
 dispatch ("do":tId:[]) = complete (read tId :: Int)
 dispatch (invalidCommand:[]) = putStrLn $ "Command not recognized: " ++ invalidCommand
 dispatch _ = putStrLn "Command not recognized"
-
 
 list :: IO ()
 list = do
@@ -42,9 +39,11 @@ complete = updateTodoTxtWith completeTodo
 
 updateTodoTxtWith :: (Int -> [Todo] -> (Maybe Todo, [Todo])) -> Int -> IO ()
 updateTodoTxtWith f targetTodoId = do
+
   contents <- readFile todoFile
   let todoTxt = readTodoTxt contents
   let (target, newTodoList) = f targetTodoId todoTxt
+
   case target of
 
     Just todo -> do
