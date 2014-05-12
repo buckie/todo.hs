@@ -2,7 +2,7 @@ import System.Environment (getArgs)
 import System.IO (openTempFile, hPutStr, hClose, hPutStr)
 import System.Directory (removeFile, renameFile)
 
-import TodoUtils
+import Todo.TodoUtils
 
 type TodoFile = FilePath
 todoFile :: TodoFile

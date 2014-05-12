@@ -1,4 +1,4 @@
-module TodoUtils
+module Todo.TodoUtils
 ( Todo
 , readTodoTxt
 , serialiseTodoTxt
