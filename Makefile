@@ -5,6 +5,7 @@ build:
 
 clean:
 	rm -f *.o *.hi
+	rm -f Todo/*.o Todo/*.hi
 	rm -f todo-txt t.txt
 
 fake_todo:
