@@ -10,7 +10,7 @@ todoFile = "./t.txt"
 list :: IO ()
 list = do
   contents <- readFile todoFile
-  putStrLn . displayTodoTxt $ readTodoTxt contents
+  putStrLn . displayTodos $ readTodos contents
 
 add :: String -> IO ()
 add todo = do
@@ -18,26 +18,25 @@ add todo = do
   list
 
 remove :: TodoId -> IO ()
-remove = updateTodoTxtWith removeTodo
+remove = updateTodoFileWith removeTodo
 
 complete :: TodoId -> IO ()
-complete = updateTodoTxtWith completeTodo
+complete = updateTodoFileWith completeTodo
 
 updateTodoFile :: [Todo] -> IO ()
 updateTodoFile newTodoList = do
-  let newContents = serialiseTodoTxt newTodoList
+  let newContents = serialiseTodos newTodoList
   (tempName, tempH) <- openTempFile "." "temp"
   hPutStr tempH newContents
   hClose tempH
   removeFile todoFile
   renameFile tempName todoFile
 
-type TodoUpdater = TodoId -> [Todo] -> (Maybe Todo, [Todo])
-updateTodoTxtWith :: TodoUpdater -> TodoId -> IO ()
-updateTodoTxtWith f targetTodoId = do
+updateTodoFileWith :: TodosUpdater -> TodoId -> IO ()
+updateTodoFileWith f targetTodoId = do
   contents <- readFile todoFile
-  let todoTxt = readTodoTxt contents
-  let (target, newTodoList) = f targetTodoId todoTxt
+  let todos = readTodos contents
+  let (target, newTodoList) = f targetTodoId todos
   case target of
     Just todo -> do
       updateTodoFile newTodoList
