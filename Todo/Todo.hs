@@ -6,12 +6,22 @@ module Todo.Todo
 ) where
 
 import Data.Char (toUpper)
+import System.Console.ANSI
 
 type TodoId = Int
 data Todo = Todo TodoId String deriving (Eq)
 
 instance Show Todo where
-  show (Todo todoId todoText) = show todoId ++ " " ++ todoText
+  show todo@(Todo todoId todoText)
+    | completed todo = resetColor ++ todoLine
+    | otherwise = case priority todo of
+                    Priority 'A' -> setColor Yellow ++ todoLine
+                    Priority 'B' -> setColor Green ++ todoLine
+                    Priority 'C' -> setColor Blue ++ todoLine
+                    _ -> resetColor ++ todoLine
+    where todoLine = show todoId ++ " " ++ todoText
+          setColor c = setSGRCode [SetColor Foreground Dull c]
+          resetColor = setSGRCode []
 
 instance Ord Todo where
   compare t1 t2
