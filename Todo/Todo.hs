@@ -2,6 +2,7 @@ module Todo.Todo
 ( Todo(..)
 , TodoId
 , completed
+, complete
 , priority
 ) where
 
@@ -36,6 +37,11 @@ completed (Todo _ text) =
   case text of
     ('x':' ':_) -> True
     _ -> False
+
+complete :: Todo -> Todo
+complete todo@(Todo tId text)
+  | completed todo = todo
+  | otherwise = Todo tId ("x " ++ text)
 
 data Priority = None | Priority Char deriving (Eq)
 
