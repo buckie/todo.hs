@@ -2,6 +2,7 @@ import System.Environment (getArgs)
 import System.Process (runCommand)
 import System.IO (openTempFile, hPutStr, hClose, hPutStr)
 import System.Directory (removeFile, renameFile)
+import Control.Monad
 
 import Todo.Actions
 
@@ -33,17 +34,17 @@ updateTodoFile newTodoList = do
   removeFile todoFile
   renameFile tempName todoFile
 
+
 updateTodoFileWith :: TodosUpdater -> TodoId -> IO ()
 updateTodoFileWith f targetTodoId = do
   contents <- readFile todoFile
   let todos = readTodos contents
-  let (target, newTodoList) = f targetTodoId todos
-  case target of
-    Just todo -> do
-      updateTodoFile newTodoList
-      list
-      putStrLn $ "Updated: " ++ show todo
-    Nothing -> putStrLn $ "Cannot find todo #" ++ show targetTodoId
+  let (updateMessages, newTodoList) = f targetTodoId todos
+  case newTodoList of
+    Just newTodos -> updateTodoFile newTodos
+    Nothing -> return ()
+  list
+  forM_ updateMessages putStrLn
 
 editTodoFile :: IO ()
 editTodoFile = do
