@@ -18,6 +18,9 @@ updateTodoFile newTodos = do
   renameFile tempName todoFile
 
 type TodosUpdater = [TodoId] -> [Todo] -> Maybe [Todo]
+-- FIXME: more meaningful "Todos affected" (Actually show the new todos)
+-- FIXME: make sure that the "Todos affected" IDs reflect the ones
+--        displayed by `list`
 updateTodoFileWith ::  TodosUpdater -> [TodoId] -> IO ()
 updateTodoFileWith updateF targetTodoIds = do
   contents <- readFile todoFile
@@ -25,9 +28,12 @@ updateTodoFileWith updateF targetTodoIds = do
   let newTodos = updateF targetTodoIds oldTodos
   case newTodos of
     Just todos -> do
+      list
       updateTodoFile todos
       putStrLn $ "Todo(s) affected: " ++ show targetTodoIds
-    Nothing -> putStrLn $ "Could not find todo(s): " ++ show targetTodoIds
+    Nothing -> do
+      list
+      putStrLn $ "Could not find todo(s): " ++ show targetTodoIds
 
 list :: IO ()
 list = do
@@ -39,11 +45,20 @@ add todo = do
   appendFile todoFile $ todo ++ "\n"
   list
 
-remove :: [TodoId] -> IO ()
-remove = updateTodoFileWith removeTodos
-
 complete :: [TodoId] -> IO ()
 complete = updateTodoFileWith completeTodos
+
+uncomplete :: [TodoId] -> IO ()
+uncomplete = updateTodoFileWith uncompleteTodos
+
+prioritise :: Char -> [TodoId] -> IO ()
+prioritise priorityChar = updateTodoFileWith (prioritiseTodos priorityChar)
+
+unprioritise :: [TodoId] -> IO ()
+unprioritise = updateTodoFileWith unprioritiseTodos
+
+remove :: [TodoId] -> IO ()
+remove = updateTodoFileWith removeTodos
 
 editTodoFile :: IO ()
 editTodoFile = do
@@ -54,14 +69,28 @@ dispatch :: [String] -> IO ()
 dispatch [] = list
 dispatch ("list":[]) = list
 dispatch ("ls":[]) = list
+
 dispatch ("add":todo) = add $ unwords todo
 dispatch ("a":todo) = add $ unwords todo
-dispatch ("remove":tIds) = remove $ map (\tId -> read tId :: Int) tIds
-dispatch ("rm":tIds) = remove $ map read tIds
+
 dispatch ("complete":tIds) = complete $ map read tIds
 dispatch ("do":tIds) = complete $ map read tIds
+
+dispatch ("uncomplete":tIds) = uncomplete $ map read tIds
+dispatch ("undo":tIds) = uncomplete $ map read tIds
+
+dispatch ("prioritise":pri:tIds) = prioritise (head pri) $ map read tIds
+dispatch ("pri":pri:tIds) = prioritise (head pri) $ map read tIds
+
+dispatch ("unprioritise":tIds) = unprioritise $ map read tIds
+dispatch ("unpri":tIds) = unprioritise $ map read tIds
+
+dispatch ("remove":tIds) = remove $ map (\tId -> read tId :: Int) tIds
+dispatch ("rm":tIds) = remove $ map read tIds
+
 dispatch ("edit":[]) = editTodoFile
 dispatch ("e":[]) = editTodoFile
+
 dispatch (invalidCommand:[]) = putStrLn $ "Command not recognized: " ++ invalidCommand
 dispatch _ = putStrLn "Command not recognized"
 
