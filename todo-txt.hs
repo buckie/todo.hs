@@ -44,6 +44,7 @@ remove = updateTodoFileWith removeTodos
 
 complete :: [TodoId] -> IO ()
 complete = updateTodoFileWith completeTodos
+
 editTodoFile :: IO ()
 editTodoFile = do
   _ <- runCommand $ "$EDITOR " ++ todoFile
