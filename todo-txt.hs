@@ -1,4 +1,5 @@
 import System.Environment (getArgs)
+import System.Process (runCommand)
 import System.IO (openTempFile, hPutStr, hClose, hPutStr)
 import System.Directory (removeFile, renameFile)
 
@@ -44,6 +45,11 @@ updateTodoFileWith f targetTodoId = do
       putStrLn $ "Updated: " ++ show todo
     Nothing -> putStrLn $ "Cannot find todo #" ++ show targetTodoId
 
+editTodoFile :: IO ()
+editTodoFile = do
+  _ <- runCommand $ "$EDITOR " ++ todoFile
+  return ()
+
 dispatch :: [String] -> IO ()
 dispatch [] = list
 dispatch ("list":[]) = list
@@ -54,6 +60,8 @@ dispatch ("remove":tId:[]) = remove (read tId :: TodoId)
 dispatch ("rm":tId:[]) = remove (read tId :: TodoId)
 dispatch ("complete":tId:[]) = complete (read tId :: TodoId)
 dispatch ("do":tId:[]) = complete (read tId :: TodoId)
+dispatch ("edit":[]) = editTodoFile
+dispatch ("e":[]) = editTodoFile
 dispatch (invalidCommand:[]) = putStrLn $ "Command not recognized: " ++ invalidCommand
 dispatch _ = putStrLn "Command not recognized"
 
