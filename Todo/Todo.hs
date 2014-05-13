@@ -13,7 +13,7 @@ data Todo = Todo TodoId String deriving (Eq)
 
 instance Show Todo where
   show todo@(Todo todoId todoText)
-    | completed todo = resetColor ++ todoLine
+    | completed todo = setColor White ++ todoLine
     | otherwise = case priority todo of
                     Priority 'A' -> setColor Yellow ++ todoLine
                     Priority 'B' -> setColor Green ++ todoLine
