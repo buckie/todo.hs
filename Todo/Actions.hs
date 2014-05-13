@@ -4,8 +4,8 @@ module Todo.Actions
 , readTodos
 , serialiseTodos
 , displayTodos
-, removeTodo
-, completeTodo
+, removeTodos
+, completeTodos
 ) where
 
 import Data.List (partition, sort)
@@ -23,30 +23,34 @@ displayTodos :: [Todo] -> String
 displayTodos = unlines . map show . sort
 
 serialiseTodos :: [Todo] -> String
-serialiseTodos = unlines . map (\(Todo _ text) -> text)
+serialiseTodos = unlines . map (\(Todo _ text) -> text) . sort
 
-type UpdateMessage = String
+type FoundTodo = Todo
+type OtherTodo = Todo
+findTodos :: [TodoId] -> [Todo] -> ([FoundTodo], [OtherTodo])
+findTodos targetTodoIds todos = (foundTodos, otherTodos)
+                                where
+                                  (foundTodos, otherTodos) = partition (\(Todo tId _) -> tId `elem` targetTodoIds) todos
+
 type UpdatedTodo = Todo
-type UpdateResponse = ([UpdateMessage], Maybe [UpdatedTodo])
+type UpdateAction = Todo -> UpdatedTodo
+updateTodos :: [TodoId] -> [Todo] -> UpdateAction -> Maybe [UpdatedTodo]
+updateTodos targetTodoIds todos updateF =
+  case updatedTodos of
+    [] -> Nothing
+    _ -> Just $ otherTodos ++ updatedTodos
+  where
+    (todosToUpdate, otherTodos) = findTodos targetTodoIds todos
+    updatedTodos = map updateF todosToUpdate
 
-findAndUpdateTodos :: TodoId -> [Todo] -> ([Todo] -> ([UpdateMessage], [UpdatedTodo])) -> UpdateResponse
-findAndUpdateTodos targetTodoId todoList f =
-    (updateMessages, maybeNewTodos)
-    where (todosToUpdate, otherTodos) = partition (\(Todo tId _) -> targetTodoId == tId) todoList
-          (updateMessages, maybeNewTodos) = case todosToUpdate of
-                                                [] -> (["Could not find todo #" ++ show targetTodoId], Nothing)
-                                                (_:[]) -> let (updateMessages', updatedTodos) = f todosToUpdate in
-                                                             (updateMessages', Just $ otherTodos ++ updatedTodos)
-                                                _ -> error $ "No way! Found more than one todo with id #" ++ show targetTodoId
+completeTodos :: [TodoId] -> [Todo] -> Maybe [UpdatedTodo]
+completeTodos targetTodoIds todos = updateTodos targetTodoIds todos complete
 
-removeTodo :: TodoId -> [Todo] -> UpdateResponse
-removeTodo targetTodoId todoList = findAndUpdateTodos targetTodoId todoList remove
-                                   where remove :: [Todo] -> ([UpdateMessage], [UpdatedTodo])
-                                         remove ts = (map (\(Todo tId _) -> "Todo #" ++ show tId ++ " removed.") ts, [])
-
-completeTodo :: TodoId -> [Todo] -> UpdateResponse
-completeTodo targetTodoId todoList = findAndUpdateTodos targetTodoId todoList complete
-                                     where -- complete :: [Todo] -> ([UpdateMessage], [UpdatedTodo])
-                                           complete ts = ( map (\(Todo tId _) -> show tId ++ " updated.") ts
-                                                         , map (\(Todo tId text) -> (Todo tId ("x " ++ text))) ts)
+removeTodos :: [TodoId] -> [Todo] -> Maybe [Todo]
+removeTodos targetTodoIds todos =
+  case removedTodos of
+    [] -> Nothing
+    _ -> Just otherTodos
+  where
+    (removedTodos, otherTodos) = findTodos targetTodoIds todos
 

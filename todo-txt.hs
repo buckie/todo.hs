@@ -2,12 +2,32 @@ import System.Environment (getArgs)
 import System.Process (runCommand)
 import System.IO (openTempFile, hPutStr, hClose, hPutStr)
 import System.Directory (removeFile, renameFile)
-import Control.Monad
 
 import Todo.Actions
 
 todoFile :: FilePath
 todoFile = "./t.txt"
+
+updateTodoFile :: [Todo] -> IO ()
+updateTodoFile newTodos = do
+  let newContents = serialiseTodos newTodos
+  (tempName, tempH) <- openTempFile "." "temp"
+  hPutStr tempH newContents
+  hClose tempH
+  removeFile todoFile
+  renameFile tempName todoFile
+
+type TodosUpdater = [TodoId] -> [Todo] -> Maybe [Todo]
+updateTodoFileWith ::  TodosUpdater -> [TodoId] -> IO ()
+updateTodoFileWith updateF targetTodoIds = do
+  contents <- readFile todoFile
+  let oldTodos = readTodos contents
+  let newTodos = updateF targetTodoIds oldTodos
+  case newTodos of
+    Just todos -> do
+      updateTodoFile todos
+      putStrLn $ "Todo(s) affected: " ++ show targetTodoIds
+    Nothing -> putStrLn $ "Could not find todo(s): " ++ show targetTodoIds
 
 list :: IO ()
 list = do
@@ -19,33 +39,11 @@ add todo = do
   appendFile todoFile $ todo ++ "\n"
   list
 
-remove :: TodoId -> IO ()
-remove = updateTodoFileWith removeTodo
+remove :: [TodoId] -> IO ()
+remove = updateTodoFileWith removeTodos
 
-complete :: TodoId -> IO ()
-complete = updateTodoFileWith completeTodo
-
-updateTodoFile :: [Todo] -> IO ()
-updateTodoFile newTodoList = do
-  let newContents = serialiseTodos newTodoList
-  (tempName, tempH) <- openTempFile "." "temp"
-  hPutStr tempH newContents
-  hClose tempH
-  removeFile todoFile
-  renameFile tempName todoFile
-
-
-updateTodoFileWith :: TodosUpdater -> TodoId -> IO ()
-updateTodoFileWith f targetTodoId = do
-  contents <- readFile todoFile
-  let todos = readTodos contents
-  let (updateMessages, newTodoList) = f targetTodoId todos
-  case newTodoList of
-    Just newTodos -> updateTodoFile newTodos
-    Nothing -> return ()
-  list
-  forM_ updateMessages putStrLn
-
+complete :: [TodoId] -> IO ()
+complete = updateTodoFileWith completeTodos
 editTodoFile :: IO ()
 editTodoFile = do
   _ <- runCommand $ "$EDITOR " ++ todoFile
@@ -57,10 +55,10 @@ dispatch ("list":[]) = list
 dispatch ("ls":[]) = list
 dispatch ("add":todo) = add $ unwords todo
 dispatch ("a":todo) = add $ unwords todo
-dispatch ("remove":tId:[]) = remove (read tId :: TodoId)
-dispatch ("rm":tId:[]) = remove (read tId :: TodoId)
-dispatch ("complete":tId:[]) = complete (read tId :: TodoId)
-dispatch ("do":tId:[]) = complete (read tId :: TodoId)
+dispatch ("remove":tIds) = remove $ map (\tId -> read tId :: Int) tIds
+dispatch ("rm":tIds) = remove $ map read tIds
+dispatch ("complete":tIds) = complete $ map read tIds
+dispatch ("do":tIds) = complete $ map read tIds
 dispatch ("edit":[]) = editTodoFile
 dispatch ("e":[]) = editTodoFile
 dispatch (invalidCommand:[]) = putStrLn $ "Command not recognized: " ++ invalidCommand
