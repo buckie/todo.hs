@@ -1,12 +1,14 @@
 module Todo.Todo
 ( Todo(..)
+, TodoId
 , completed
 , priority
 ) where
 
 import Data.Char (toUpper)
 
-data Todo = Todo Int String deriving (Eq)
+type TodoId = Int
+data Todo = Todo TodoId String deriving (Eq)
 
 instance Show Todo where
   show (Todo todoId todoText) = show todoId ++ " " ++ todoText

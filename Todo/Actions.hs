@@ -1,5 +1,6 @@
 module Todo.Actions
 ( Todo
+, TodoId
 , readTodoTxt
 , serialiseTodoTxt
 , displayTodoTxt

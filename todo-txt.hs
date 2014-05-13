@@ -17,10 +17,10 @@ add todo = do
   appendFile todoFile $ todo ++ "\n"
   list
 
-remove :: Int -> IO ()
+remove :: TodoId -> IO ()
 remove = updateTodoTxtWith removeTodo
 
-complete :: Int -> IO ()
+complete :: TodoId -> IO ()
 complete = updateTodoTxtWith completeTodo
 
 updateTodoFile :: [Todo] -> IO ()
@@ -32,7 +32,8 @@ updateTodoFile newTodoList = do
   removeFile todoFile
   renameFile tempName todoFile
 
-updateTodoTxtWith :: (Int -> [Todo] -> (Maybe Todo, [Todo])) -> Int -> IO ()
+type TodoUpdater = TodoId -> [Todo] -> (Maybe Todo, [Todo])
+updateTodoTxtWith :: TodoUpdater -> TodoId -> IO ()
 updateTodoTxtWith f targetTodoId = do
   contents <- readFile todoFile
   let todoTxt = readTodoTxt contents
@@ -50,10 +51,10 @@ dispatch ("list":[]) = list
 dispatch ("ls":[]) = list
 dispatch ("add":todo) = add $ unwords todo
 dispatch ("a":todo) = add $ unwords todo
-dispatch ("remove":tId:[]) = remove (read tId :: Int)
-dispatch ("rm":tId:[]) = remove (read tId :: Int)
-dispatch ("complete":tId:[]) = complete (read tId :: Int)
-dispatch ("do":tId:[]) = complete (read tId :: Int)
+dispatch ("remove":tId:[]) = remove (read tId :: TodoId)
+dispatch ("rm":tId:[]) = remove (read tId :: TodoId)
+dispatch ("complete":tId:[]) = complete (read tId :: TodoId)
+dispatch ("do":tId:[]) = complete (read tId :: TodoId)
 dispatch (invalidCommand:[]) = putStrLn $ "Command not recognized: " ++ invalidCommand
 dispatch _ = putStrLn "Command not recognized"
 
