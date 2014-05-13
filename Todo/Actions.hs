@@ -13,7 +13,8 @@ import Data.List (partition, sort)
 import qualified Data.Text as Text
 
 import Todo.Todo
-type TodosUpdater = TodoId -> [Todo] -> (Maybe Todo, [Todo])
+type UpdatedTodo = Maybe Todo
+type TodosUpdater = TodoId -> [Todo] -> (UpdatedTodo, [Todo])
 
 readTodos :: String -> [Todo]
 readTodos todoTxt =
