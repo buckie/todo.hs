@@ -13,13 +13,14 @@ data Todo = Todo TodoId String deriving (Eq)
 
 instance Show Todo where
   show todo@(Todo todoId todoText)
-    | completed todo = setColor White ++ todoLine
+    | completed todo = coloredTodoline White
     | otherwise = case priority todo of
-                    Priority 'A' -> setColor Yellow ++ todoLine
-                    Priority 'B' -> setColor Green ++ todoLine
-                    Priority 'C' -> setColor Blue ++ todoLine
-                    _ -> resetColor ++ todoLine
+                    Priority 'A' -> coloredTodoline Yellow
+                    Priority 'B' -> coloredTodoline Green
+                    Priority 'C' -> coloredTodoline Blue
+                    _ -> todoLine
     where todoLine = show todoId ++ " " ++ todoText
+          coloredTodoline color = setColor color ++ todoLine ++ resetColor
           setColor c = setSGRCode [SetColor Foreground Dull c]
           resetColor = setSGRCode []
 
