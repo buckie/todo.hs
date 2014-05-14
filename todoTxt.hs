@@ -3,6 +3,7 @@ import System.Process (runCommand)
 import System.IO (openTempFile, hPutStr, hClose, hPutStr)
 import System.Directory (removeFile, renameFile)
 
+import Control.Monad (when)
 import Data.Char (toUpper)
 
 import Todo.Actions
@@ -49,12 +50,14 @@ add todo = do
 
 complete :: [TodoID] -> IO ()
 complete targetTodoIDs = do
-  putStrLn $ "Completing todo(s): " ++ show targetTodoIDs ++ "...\n"
+  putStrLn $ "Completing todo(s): " ++ show targetTodoIDs ++ "..."
+  when (length targetTodoIDs > 3) (putStrLn "You are a machine!!")
+  putStrLn ""
   updateTodoFileWith completeTodos targetTodoIDs
 
 uncomplete :: [TodoID] -> IO ()
 uncomplete targetTodoIDs = do
-  putStrLn $ "Un-Completing todo(s): " ++ show targetTodoIDs ++ "...\n"
+  putStrLn $ "Hell yea! Reinstaing (un-completing) todo(s): " ++ show targetTodoIDs ++ "...\n"
   updateTodoFileWith uncompleteTodos targetTodoIDs
 
 prioritise :: Char -> [TodoID] -> IO ()
@@ -69,12 +72,14 @@ unprioritise targetTodoIDs = do
 
 remove :: [TodoID] -> IO ()
 remove targetTodoIDs = do
-  putStrLn $ "Removing todo(s): " ++ show targetTodoIDs ++ "\n"
+  putStrLn $ "Removing todo(s): " ++ show targetTodoIDs
+  putStrLn $ "They weren't that important anyway" ++ "\n"
   updateTodoFileWith removeTodos targetTodoIDs
 
 editTodoFile :: IO ()
 editTodoFile = do
   putStrLn "Editing todo(s) with $EDITOR"
+  putStrLn "Mr. Sulu, you have the conn."
   _ <- runCommand $ "$EDITOR " ++ todoFile
   return ()
 
