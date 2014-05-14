@@ -1,0 +1,2 @@
+- archive tasks
+- make it pick up a TODO.md file in the current dir
