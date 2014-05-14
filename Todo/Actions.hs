@@ -1,6 +1,6 @@
 module Todo.Actions
 ( Todo
-, TodoId
+, TodoID
 , readTodos
 , serialiseTodos
 , displayTodos
@@ -11,63 +11,66 @@ module Todo.Actions
 , removeTodos
 ) where
 
-import Data.List (partition, sort)
+import Data.List (sort)
 import qualified Data.Text as Text
 
 import Todo.Todo
+type TodoID = Int
 
 readTodos :: String -> [Todo]
+-- FIXME: If we want ot keep the white line in the file we could put the
+-- filter on the display
+-- (I often go in and edit the todo.txt file by hand, leaving space for clarity
+-- It'd be nice if that was mantained across saves..)
 readTodos todoTxt =
-  zipWith Todo [0..] todoLines
+  map Todo todoLines
   where todoLines = filter (not . blank) $ lines todoTxt
         blank = ([]==) . Text.unpack . Text.strip . Text.pack
 
 displayTodos :: [Todo] -> String
-displayTodos = unlines . map show . sort
+displayTodos = unlines . zipWith ((++) . show) [(0::Int)..] . map show . sort
 
 serialiseTodos :: [Todo] -> String
-serialiseTodos = unlines . map (\(Todo _ text) -> text) . sort
-
-type FoundTodo = Todo
-type OtherTodo = Todo
-findTodos :: [TodoId] -> [Todo] -> ([FoundTodo], [OtherTodo])
-findTodos targetTodoIds todos = (foundTodos, otherTodos)
-                                where
-                                  (foundTodos, otherTodos) = partition (\(Todo tId _) -> tId `elem` targetTodoIds) todos
+serialiseTodos = unlines . map (\(Todo text) -> text) . sort
 
 type UpdatedTodo = Todo
 type UpdateAction = Todo -> UpdatedTodo
--- FIXME: should return Maybe ([UpdatedTodo], [Todo])
+-- FIXME: should return Just ([UpdatedTodo], [Todo])
 --        so that we can then give more info in todos affected
-updateTodos :: [TodoId] -> [Todo] -> UpdateAction -> Maybe [UpdatedTodo]
-updateTodos targetTodoIds todos updateF =
-  case updatedTodos of
-    [] -> Nothing
-    -- FIXME: should probably recalculate todo IDs at this point since the
-    --        list is all scrambled up
-    _ -> Just $ otherTodos ++ updatedTodos
+updateTodos :: [TodoID] -> [Todo] -> UpdateAction -> Maybe [UpdatedTodo]
+updateTodos targetTodoIDs todos updateF =
+  if allIDsPresent targetTodoIDs todos
+    then Just $ map updateIfneeded $ todosWithIDs todos
+    else Nothing
   where
-    (todosToUpdate, otherTodos) = findTodos targetTodoIds todos
-    updatedTodos = map updateF todosToUpdate
+    updateIfneeded (tID, todo) = if tID `elem` targetTodoIDs
+                                    then updateF todo
+                                    else todo
 
-prioritiseTodos :: Char -> [TodoId] -> [Todo] -> Maybe [UpdatedTodo]
-prioritiseTodos priorityChar targetTodoIds todos =
-  updateTodos targetTodoIds todos (prioritise priorityChar)
 
-unprioritiseTodos :: [TodoId] -> [Todo] -> Maybe [UpdatedTodo]
-unprioritiseTodos targetTodoIds todos = updateTodos targetTodoIds todos unprioritise
+prioritiseTodos :: Char -> [TodoID] -> [Todo] -> Maybe [UpdatedTodo]
+prioritiseTodos priorityChar targetTodoIDs todos =
+  updateTodos targetTodoIDs todos (prioritise priorityChar)
 
-completeTodos :: [TodoId] -> [Todo] -> Maybe [UpdatedTodo]
-completeTodos targetTodoIds todos = updateTodos targetTodoIds todos complete
+unprioritiseTodos :: [TodoID] -> [Todo] -> Maybe [UpdatedTodo]
+unprioritiseTodos targetTodoIDs todos = updateTodos targetTodoIDs todos unprioritise
 
-uncompleteTodos :: [TodoId] -> [Todo] -> Maybe [UpdatedTodo]
-uncompleteTodos targetTodoIds todos = updateTodos targetTodoIds todos uncomplete
+completeTodos :: [TodoID] -> [Todo] -> Maybe [UpdatedTodo]
+completeTodos targetTodoIDs todos = updateTodos targetTodoIDs todos complete
 
-removeTodos :: [TodoId] -> [Todo] -> Maybe [Todo]
-removeTodos targetTodoIds todos =
-  case removedTodos of
-    [] -> Nothing
-    _ -> Just otherTodos
+uncompleteTodos :: [TodoID] -> [Todo] -> Maybe [UpdatedTodo]
+uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
+
+removeTodos :: [TodoID] -> [Todo] -> Maybe [Todo]
+removeTodos targetTodoIDs todos =
+  if allIDsPresent targetTodoIDs todos
+     then Just updatedTodos
+     else Nothing
   where
-    (removedTodos, otherTodos) = findTodos targetTodoIds todos
+    updatedTodos = [todo | (tID, todo) <- todosWithIDs todos, tID `elem` targetTodoIDs]
 
+allIDsPresent :: [TodoID] -> [Todo] -> Bool
+allIDsPresent tIDs todos = all (`elem` [0..length todos - 1]) tIDs
+
+todosWithIDs :: [Todo] -> [(TodoID, Todo)]
+todosWithIDs = zip [0..]

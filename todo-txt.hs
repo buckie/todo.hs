@@ -18,23 +18,18 @@ updateTodoFile newTodos = do
   renameFile tempName todoFile
 
 type UpdatedTodo = Todo
-type TodosUpdater = [TodoId] -> [Todo] -> Maybe [UpdatedTodo]
+type TodosUpdater = [TodoID] -> [Todo] -> Maybe [UpdatedTodo]
 -- FIXME: more meaningful "Todos affected" (Actually show the new todos)
--- FIXME: make sure that the "Todos affected" IDs reflect the ones
---        displayed by `list`
-updateTodoFileWith ::  TodosUpdater -> [TodoId] -> IO ()
-updateTodoFileWith updateF targetTodoIds = do
+updateTodoFileWith ::  TodosUpdater -> [TodoID] -> IO ()
+updateTodoFileWith updateF targetTodoIDs = do
   contents <- readFile todoFile
   let oldTodos = readTodos contents
-  let newTodos = updateF targetTodoIds oldTodos
+  let newTodos = updateF targetTodoIDs oldTodos
   case newTodos of
     Just todos -> do
-      list
       updateTodoFile todos
-      putStrLn $ "Todo(s) affected: " ++ show targetTodoIds
-    Nothing -> do
-      list
-      putStrLn $ "Could not find todo(s): " ++ show targetTodoIds
+      putStrLn $ "Todo(s) affected: " ++ show targetTodoIDs
+    Nothing -> putStrLn $ "Could not find todo(s): " ++ show targetTodoIDs
 
 list :: IO ()
 list = do
@@ -42,23 +37,21 @@ list = do
   putStrLn . displayTodos $ readTodos contents
 
 add :: String -> IO ()
-add todo = do
-  appendFile todoFile $ todo ++ "\n"
-  list
+add todo = appendFile todoFile $ todo ++ "\n"
 
-complete :: [TodoId] -> IO ()
+complete :: [TodoID] -> IO ()
 complete = updateTodoFileWith completeTodos
 
-uncomplete :: [TodoId] -> IO ()
+uncomplete :: [TodoID] -> IO ()
 uncomplete = updateTodoFileWith uncompleteTodos
 
-prioritise :: Char -> [TodoId] -> IO ()
+prioritise :: Char -> [TodoID] -> IO ()
 prioritise priorityChar = updateTodoFileWith (prioritiseTodos priorityChar)
 
-unprioritise :: [TodoId] -> IO ()
+unprioritise :: [TodoID] -> IO ()
 unprioritise = updateTodoFileWith unprioritiseTodos
 
-remove :: [TodoId] -> IO ()
+remove :: [TodoID] -> IO ()
 remove = updateTodoFileWith removeTodos
 
 editTodoFile :: IO ()

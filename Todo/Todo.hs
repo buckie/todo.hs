@@ -1,6 +1,5 @@
 module Todo.Todo
 ( Todo(..)
-, TodoId
 , completed
 , complete
 , uncomplete
@@ -13,18 +12,17 @@ module Todo.Todo
 import Data.Char (toUpper)
 import System.Console.ANSI
 
-type TodoId = Int
-data Todo = Todo TodoId String deriving (Eq)
+data Todo = Todo String deriving (Eq)
 
 instance Show Todo where
-  show todo@(Todo todoId todoText)
+  show todo@(Todo text)
     | completed todo = coloredTodoline White
     | otherwise = case priority todo of
                     Priority 'A' -> coloredTodoline Yellow
                     Priority 'B' -> coloredTodoline Green
                     Priority 'C' -> coloredTodoline Blue
                     _ -> todoLine
-    where todoLine = show todoId ++ " " ++ todoText
+    where todoLine = text
           coloredTodoline color = setColor color ++ todoLine ++ resetColor
           setColor c = setSGRCode [SetColor Foreground Dull c]
           resetColor = setSGRCode []
@@ -37,31 +35,30 @@ instance Ord Todo where
     | otherwise = compare (priority t1) (priority t2)
 
 completed :: Todo -> Bool
-completed (Todo _ text) =
+completed (Todo text) =
   case text of
     ('x':' ':_) -> True
     _ -> False
 
 complete :: Todo -> Todo
-complete todo@(Todo tId text)
+complete todo@(Todo text)
   | completed todo = todo
-  | otherwise = Todo tId ("x " ++ text)
+  | otherwise = Todo ("x " ++ text)
 
 uncomplete :: Todo -> Todo
-uncomplete todo@(Todo todoId text)
-  | completed todo = Todo todoId (drop 2 text)
+uncomplete todo@(Todo text)
+  | completed todo = Todo (drop 2 text)
   | otherwise = todo
 
 data Priority = None | Priority Char deriving (Eq)
-
 instance Ord Priority where
   compare None _ = LT
   compare (Priority _) None = GT
   compare (Priority p1) (Priority p2) = flip compare p1 p2
 
 priority :: Todo -> Priority
-priority (Todo _ todoText) = -- FIXME: use regexpes...
-  case priorityChar todoText of
+priority (Todo text) = -- FIXME: use regexpes...
+  case priorityChar text of
     Just pri -> if pri `elem` ['A'..'E']
                   then Priority (toUpper pri)
                   else None
@@ -78,14 +75,14 @@ prioritised todo = case priority todo of
                      Priority _ -> True
 
 unprioritise ::Todo -> Todo
-unprioritise todo@(Todo tId text)
+unprioritise todo@(Todo text)
   | completed todo && prioritised todo = complete . unprioritise $ uncomplete todo
-  | prioritised todo = Todo tId (drop 4 text)
+  | prioritised todo = Todo (drop 4 text)
   | otherwise = todo
 
 prioritise :: Char -> Todo -> Todo
-prioritise priorityChar todo@(Todo todoId todoText)
+prioritise priorityChar todo@(Todo text)
   | completed todo && prioritised todo = complete . prioritise priorityChar $ (uncomplete . unprioritise) todo
   | prioritised todo = prioritise priorityChar $ unprioritise todo
-  | otherwise = Todo todoId (priorityString ++ todoText)
+  | otherwise = Todo (priorityString ++ text)
   where priorityString = "(" ++ [toUpper priorityChar] ++ ") "
