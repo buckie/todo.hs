@@ -28,7 +28,13 @@ readTodos todoTxt =
         blank = ([]==) . Text.unpack . Text.strip . Text.pack
 
 displayTodos :: [Todo] -> String
-displayTodos = unlines . zipWith ((++) . show) [(0::Int)..] . map show . sort
+-- FIXME: show numbers with a fixed "width"
+displayTodos todos = unlines todoList
+                     where sortedTodoLines = map show $ sort todos
+                           tIDs = map show [(0::Int)..]
+                           todoList = zipWith (\tID todoLine -> tID ++ " " ++ todoLine) tIDs sortedTodoLines
+
+
 
 serialiseTodos :: [Todo] -> String
 serialiseTodos = unlines . map (\(Todo text) -> text) . sort
