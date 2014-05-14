@@ -18,20 +18,15 @@ import Todo.Todo
 type TodoID = Int
 
 readTodos :: String -> [Todo]
--- FIXME: If we want ot keep the white line in the file we could put the
--- filter on the display
--- (I often go in and edit the todo.txt file by hand, leaving space for clarity
--- It'd be nice if that was mantained across saves..)
 readTodos todoTxt =
-  map Todo todoLines
-  where todoLines = filter (not . blank) $ lines todoTxt
-        blank = ([]==) . Text.unpack . Text.strip . Text.pack
+  map Todo $ lines todoTxt
 
 displayTodos :: [Todo] -> String
 -- FIXME: show numbers with a fixed "width"
 displayTodos todos = unlines todoList
                      where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
-                           todoList = map (\(tID, todo) -> show tID ++ " " ++ show todo) sortedTodosWithIDs
+                           todoList = [show tID ++ " " ++ show todo | (tID, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
+                           blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
 serialiseTodos :: [Todo] -> String
 serialiseTodos = unlines . map (\(Todo text) -> text)
