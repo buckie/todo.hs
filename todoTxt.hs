@@ -8,79 +8,97 @@ import Data.Char (toUpper)
 
 import Todo.Actions
 
-todoFile :: FilePath
-todoFile = "./t.txt"
+todoTxtFilePath :: FilePath
+todoTxtFilePath = "./t.txt"
 
-updateTodoFile :: [Todo] -> IO ()
-updateTodoFile newTodos = do
+archiveFilePath :: FilePath
+archiveFilePath = "./archive.txt"
+
+-- ################################################################
+-- FIXME: Move this to some Todo.File module
+
+readTodoFile :: FilePath -> IO [Todo]
+readTodoFile todoFilePath = do
+  contents <- readFile todoFilePath
+  return $ readTodos contents
+
+type UpdatedTodo = Todo
+type TodosUpdater = [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
+
+updateTodoFile :: FilePath -> [Todo] -> IO ()
+updateTodoFile todoFilePath newTodos = do
   let newContents = serialiseTodos newTodos
   (tempName, tempH) <- openTempFile "." "temp"
   hPutStr tempH newContents
   hClose tempH
-  removeFile todoFile
-  renameFile tempName todoFile
+  removeFile todoFilePath
+  renameFile tempName todoFilePath
 
-type UpdatedTodo = Todo
-type TodosUpdater = [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
-updateTodoFileWith ::  TodosUpdater -> [TodoID] -> IO ()
-updateTodoFileWith updateF targetTodoIDs = do
-  contents <- readFile todoFile
-  let oldTodos = readTodos contents
+updateTodoFileWith ::  FilePath -> TodosUpdater -> [TodoID] -> IO ()
+updateTodoFileWith todoFilePath updateF targetTodoIDs = do
+  oldTodos <- readTodoFile todoFilePath
   let updateResult = updateF targetTodoIDs oldTodos
   case updateResult of
     Just (updatedTodos, newTodos) -> do
-      updateTodoFile newTodos
-      putStrLn $ displayTodos newTodos
+      updateTodoFile todoFilePath newTodos
+      putStrLn $ displayTodoList newTodos
+      -- FIXME: should have a method to display todos
       putStrLn $ "Todo(s) affected:\n" ++ unlines (map show updatedTodos)
     Nothing -> do
-      putStrLn $ displayTodos oldTodos
+      putStrLn $ displayTodoList oldTodos
       putStrLn $ "Could not find todo(s): " ++ show targetTodoIDs
+
+appendTodoFile :: FilePath -> [Todo] -> IO ()
+appendTodoFile todoFilePath todos = appendFile todoFilePath $ serialiseTodos todos
+
+-- ################################################################
 
 list :: IO ()
 list = do
-  contents <- readFile todoFile
-  putStrLn . displayTodos $ readTodos contents
+  todos <- readTodoFile todoTxtFilePath
+  putStrLn $ displayTodoList todos
 
 add :: String -> IO ()
-add todo = do
-  putStrLn "Adding todo..."
-  print todo
-  putStrLn "\n"
-  appendFile todoFile $ todo ++ "\n"
+add todoText = do
+  putStrLn "Adding todo:"
+  let todos = readTodos todoText
+  putStrLn $ displayTodos todos
+  appendTodoFile todoTxtFilePath todos
 
 complete :: [TodoID] -> IO ()
 complete targetTodoIDs = do
   putStrLn $ "Completing todo(s): " ++ show targetTodoIDs ++ "..."
   when (length targetTodoIDs > 3) (putStrLn "You are a machine!!")
   putStrLn ""
-  updateTodoFileWith completeTodos targetTodoIDs
+  updateTodoFileWith todoTxtFilePath completeTodos targetTodoIDs
 
 uncomplete :: [TodoID] -> IO ()
 uncomplete targetTodoIDs = do
   putStrLn $ "Hell yea! Reinstaing (un-completing) todo(s): " ++ show targetTodoIDs ++ "...\n"
-  updateTodoFileWith uncompleteTodos targetTodoIDs
+  updateTodoFileWith todoTxtFilePath uncompleteTodos targetTodoIDs
 
 prioritise :: Char -> [TodoID] -> IO ()
 prioritise priorityChar targetTodoIDs = do
   putStrLn $ "Prioritizing todo(s) (priority " ++ [toUpper priorityChar] ++ "): " ++ show targetTodoIDs ++ "...\n"
-  updateTodoFileWith (prioritiseTodos priorityChar) targetTodoIDs
+  updateTodoFileWith todoTxtFilePath (prioritiseTodos priorityChar) targetTodoIDs
 
 unprioritise :: [TodoID] -> IO ()
 unprioritise targetTodoIDs = do
   putStrLn $ "Un-Prioritizing todo(s): " ++ show targetTodoIDs
-  updateTodoFileWith unprioritiseTodos targetTodoIDs
+  updateTodoFileWith todoTxtFilePath unprioritiseTodos targetTodoIDs
+
 
 remove :: [TodoID] -> IO ()
 remove targetTodoIDs = do
   putStrLn $ "Removing todo(s): " ++ show targetTodoIDs
   putStrLn $ "They weren't that important anyway" ++ "\n"
-  updateTodoFileWith removeTodos targetTodoIDs
+  updateTodoFileWith todoTxtFilePath removeTodos targetTodoIDs
 
 editTodoFile :: IO ()
 editTodoFile = do
   putStrLn "Editing todo(s) with $EDITOR"
   putStrLn "Mr. Sulu, you have the conn."
-  _ <- runCommand $ "$EDITOR " ++ todoFile
+  _ <- runCommand $ "$EDITOR " ++ todoTxtFilePath
   return ()
 
 dispatch :: [String] -> IO ()

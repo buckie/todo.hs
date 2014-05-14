@@ -2,8 +2,10 @@ module Todo.Actions
 ( Todo
 , TodoID
 , readTodos
-, serialiseTodos
+, displayTodoList
 , displayTodos
+, serialiseTodos
+, archiveTodos
 , completeTodos
 , uncompleteTodos
 , prioritiseTodos
@@ -22,15 +24,30 @@ readTodos :: String -> [Todo]
 readTodos todoTxt =
   map Todo $ lines todoTxt
 
-displayTodos :: [Todo] -> String
-displayTodos todos = unlines todoList
+displayTodoList :: [Todo] -> String
+displayTodoList todos = unlines todoList
                      where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
                            showTodoID = Printf.printf "%3d "
                            todoList = [showTodoID tID ++ show todo | (tID, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
                            blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
+-- FIXME: dry this up
+displayTodos :: [Todo] -> String
+displayTodos todos = unlines todoList
+                     where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
+                           todoList = [show todo | (_, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
+                           blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
+
 serialiseTodos :: [Todo] -> String
 serialiseTodos = unlines . map (\(Todo text) -> text)
+
+type ArchivedTodo = Todo
+archiveTodos :: [Todo] -> Maybe ([ArchivedTodo], [Todo])
+archiveTodos todos =
+  case archivedTodos of
+    [] -> Nothing
+    _ -> Just (archivedTodos, newTodos)
+  where (archivedTodos, newTodos) = partition completed todos
 
 type UpdatedTodo = Todo
 type UpdateAction = Todo -> UpdatedTodo
