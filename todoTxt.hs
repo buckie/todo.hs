@@ -3,6 +3,8 @@ import System.Process (runCommand)
 import System.IO (openTempFile, hPutStr, hClose, hPutStr)
 import System.Directory (removeFile, renameFile)
 
+import Data.Char (toUpper)
+
 import Todo.Actions
 
 todoFile :: FilePath
@@ -27,8 +29,11 @@ updateTodoFileWith updateF targetTodoIDs = do
   case updateResult of
     Just (updatedTodos, newTodos) -> do
       updateTodoFile newTodos
+      putStrLn $ displayTodos newTodos
       putStrLn $ "Todo(s) affected:\n" ++ unlines (map show updatedTodos)
-    Nothing -> putStrLn $ "Could not find todo(s): " ++ show targetTodoIDs
+    Nothing -> do
+      putStrLn $ displayTodos oldTodos
+      putStrLn $ "Could not find todo(s): " ++ show targetTodoIDs
 
 list :: IO ()
 list = do
@@ -36,27 +41,40 @@ list = do
   putStrLn . displayTodos $ readTodos contents
 
 add :: String -> IO ()
-add todo = appendFile todoFile $ todo ++ "\n"
+add todo = do
+  putStrLn "Adding todo..."
+  print todo
+  putStrLn "\n"
+  appendFile todoFile $ todo ++ "\n"
 
 complete :: [TodoID] -> IO ()
-complete = updateTodoFileWith completeTodos
+complete targetTodoIDs = do
+  putStrLn $ "Completing todo(s): " ++ show targetTodoIDs ++ "...\n"
+  updateTodoFileWith completeTodos targetTodoIDs
 
 uncomplete :: [TodoID] -> IO ()
-uncomplete = updateTodoFileWith uncompleteTodos
+uncomplete targetTodoIDs = do
+  putStrLn $ "Un-Completing todo(s): " ++ show targetTodoIDs ++ "...\n"
+  updateTodoFileWith uncompleteTodos targetTodoIDs
 
 prioritise :: Char -> [TodoID] -> IO ()
-prioritise priorityChar = updateTodoFileWith (prioritiseTodos priorityChar)
+prioritise priorityChar targetTodoIDs = do
+  putStrLn $ "Prioritizing todo(s) (priority " ++ [toUpper priorityChar] ++ "): " ++ show targetTodoIDs ++ "...\n"
+  updateTodoFileWith (prioritiseTodos priorityChar) targetTodoIDs
 
 unprioritise :: [TodoID] -> IO ()
-unprioritise = updateTodoFileWith unprioritiseTodos
+unprioritise targetTodoIDs = do
+  putStrLn $ "Un-Prioritizing todo(s): " ++ show targetTodoIDs
+  updateTodoFileWith unprioritiseTodos targetTodoIDs
 
 remove :: [TodoID] -> IO ()
 remove targetTodoIDs = do
-  putStrLn $ "Removing todos: " ++ show targetTodoIDs ++ "\n"
+  putStrLn $ "Removing todo(s): " ++ show targetTodoIDs ++ "\n"
   updateTodoFileWith removeTodos targetTodoIDs
 
 editTodoFile :: IO ()
 editTodoFile = do
+  putStrLn "Editing todo(s) with $EDITOR"
   _ <- runCommand $ "$EDITOR " ++ todoFile
   return ()
 
