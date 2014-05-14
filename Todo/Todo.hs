@@ -82,7 +82,7 @@ unprioritise todo@(Todo text)
 
 prioritise :: Char -> Todo -> Todo
 prioritise priorityChar todo@(Todo text)
-  | completed todo && prioritised todo = complete . prioritise priorityChar $ (uncomplete . unprioritise) todo
+  | completed todo = complete . prioritise priorityChar $ uncomplete todo
   | prioritised todo = prioritise priorityChar $ unprioritise todo
   | otherwise = Todo (priorityString ++ text)
   where priorityString = "(" ++ [toUpper priorityChar] ++ ") "

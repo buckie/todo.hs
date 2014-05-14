@@ -11,7 +11,7 @@ module Todo.Actions
 , removeTodos
 ) where
 
-import Data.List (sort)
+import Data.List (sortBy)
 import qualified Data.Text as Text
 
 import Todo.Todo
@@ -30,14 +30,11 @@ readTodos todoTxt =
 displayTodos :: [Todo] -> String
 -- FIXME: show numbers with a fixed "width"
 displayTodos todos = unlines todoList
-                     where sortedTodoLines = map show $ sort todos
-                           tIDs = map show [(0::Int)..]
-                           todoList = zipWith (\tID todoLine -> tID ++ " " ++ todoLine) tIDs sortedTodoLines
-
-
+                     where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
+                           todoList = map (\(tID, todo) -> show tID ++ " " ++ show todo) sortedTodosWithIDs
 
 serialiseTodos :: [Todo] -> String
-serialiseTodos = unlines . map (\(Todo text) -> text) . sort
+serialiseTodos = unlines . map (\(Todo text) -> text)
 
 type UpdatedTodo = Todo
 type UpdateAction = Todo -> UpdatedTodo
