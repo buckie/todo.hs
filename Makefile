@@ -1,19 +1,31 @@
 build:
 	make clean
 	ghc todoTxt.hs
-	mv todoTxt t
-	make fake_todo
+	make __post_build
+
+llvm_build:
+	make clean
+	ghc -fllvm todoTxt.hs
+	make __post_build
 
 clean:
-	rm -f *.o *.hi
-	rm -f Todo/*.o Todo/*.hi
+	make __clean_junk
 	rm -f t t.txt
 
-fake_todo:
+__post_build:
+	mv todoTxt t
+	make __fake_todo
+	make __clean_junk
+
+__clean_junk:
+	rm -f *.o *.hi
+	rm -f Todo/*.o Todo/*.hi
+
+__fake_todo:
 	cp t.txt.sample t.txt
 
 seed:
-	make fake_todo
+	make __fake_todo
 
 # I'm so sorry about this:
 fetch_deps:
