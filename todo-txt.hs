@@ -17,7 +17,8 @@ updateTodoFile newTodos = do
   removeFile todoFile
   renameFile tempName todoFile
 
-type TodosUpdater = [TodoId] -> [Todo] -> Maybe [Todo]
+type UpdatedTodo = Todo
+type TodosUpdater = [TodoId] -> [Todo] -> Maybe [UpdatedTodo]
 -- FIXME: more meaningful "Todos affected" (Actually show the new todos)
 -- FIXME: make sure that the "Todos affected" IDs reflect the ones
 --        displayed by `list`
