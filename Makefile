@@ -1,7 +1,7 @@
 build:
 	make clean
-	ghc todo-txt.hs
-	mv todo-txt t
+	ghc todoTxt.hs
+	mv todoTxt t
 	make fake_todo
 
 clean:
