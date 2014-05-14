@@ -87,12 +87,26 @@ unprioritise targetTodoIDs = do
   putStrLn $ "Un-Prioritizing todo(s): " ++ show targetTodoIDs
   updateTodoFileWith todoTxtFilePath unprioritiseTodos targetTodoIDs
 
-
 remove :: [TodoID] -> IO ()
 remove targetTodoIDs = do
   putStrLn $ "Removing todo(s): " ++ show targetTodoIDs
   putStrLn $ "They weren't that important anyway" ++ "\n"
   updateTodoFileWith todoTxtFilePath removeTodos targetTodoIDs
+
+archive :: IO ()
+archive = do
+  oldTodos <- readTodoFile todoTxtFilePath
+  let archiveResult = archiveTodos oldTodos
+  case archiveResult of
+    Just (todosToArchive, updatedTodos) -> do
+      putStrLn $ "Archiving todos (" ++ todoTxtFilePath ++ " -> " ++ archiveFilePath ++ " )...\n"
+      appendTodoFile archiveFilePath todosToArchive
+      updateTodoFile todoTxtFilePath updatedTodos
+      putStrLn $ displayTodoList updatedTodos
+      putStrLn $ show (length todosToArchive) ++ " todo(s) archived to " ++ archiveFilePath ++ ":\n"
+      putStrLn $ displayTodos todosToArchive
+    Nothing -> putStrLn "Nothing to archive!"
+
 
 editTodoFile :: IO ()
 editTodoFile = do
@@ -124,6 +138,9 @@ dispatch ("unpri":tIds) = unprioritise $ map read tIds
 
 dispatch ("remove":tIds) = remove $ map (\tId -> read tId :: Int) tIds
 dispatch ("rm":tIds) = remove $ map read tIds
+
+dispatch ("archive":[]) = archive
+dispatch ("ar":[]) = archive
 
 dispatch ("edit":[]) = editTodoFile
 dispatch ("e":[]) = editTodoFile

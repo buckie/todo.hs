@@ -10,7 +10,8 @@ llvm_build:
 
 clean:
 	make __clean_junk
-	rm -f t t.txt
+	rm -f t
+	rm -f archive.txt t.txt
 
 __post_build:
 	mv todoTxt t
