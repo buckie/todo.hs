@@ -39,6 +39,8 @@ displayTodos todos = unlines todoList
                            blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
 serialiseTodos :: [Todo] -> String
+-- FIXME: maybe this is not the right place .. but priority needs to be
+-- uppercased; even if I the input to this fn is lowercase
 serialiseTodos = unlines . map (\(Todo text) -> text)
 
 type ArchivedTodo = Todo
