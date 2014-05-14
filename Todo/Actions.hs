@@ -13,6 +13,7 @@ module Todo.Actions
 
 import Data.List (sortBy, partition)
 import qualified Data.Text as Text
+import qualified Text.Printf as Printf
 
 import Todo.Todo
 type TodoID = Int
@@ -22,10 +23,10 @@ readTodos todoTxt =
   map Todo $ lines todoTxt
 
 displayTodos :: [Todo] -> String
--- FIXME: show numbers with a fixed "width"
 displayTodos todos = unlines todoList
                      where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
-                           todoList = [show tID ++ " " ++ show todo | (tID, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
+                           showTodoID = Printf.printf "%3d "
+                           todoList = [showTodoID tID ++ show todo | (tID, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
                            blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
 serialiseTodos :: [Todo] -> String
@@ -83,4 +84,4 @@ allIDsPresent :: [TodoID] -> [Todo] -> Bool
 allIDsPresent tIDs todos = all (`elem` [0..length todos - 1]) tIDs
 
 todosWithIDs :: [Todo] -> [(TodoID, Todo)]
-todosWithIDs = zip [0..]
+todosWithIDs = zip [(0::Int)..]
