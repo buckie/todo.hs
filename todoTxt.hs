@@ -18,17 +18,16 @@ updateTodoFile newTodos = do
   renameFile tempName todoFile
 
 type UpdatedTodo = Todo
-type TodosUpdater = [TodoID] -> [Todo] -> Maybe [UpdatedTodo]
--- FIXME: more meaningful "Todos affected" (Actually show the new todos)
+type TodosUpdater = [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
 updateTodoFileWith ::  TodosUpdater -> [TodoID] -> IO ()
 updateTodoFileWith updateF targetTodoIDs = do
   contents <- readFile todoFile
   let oldTodos = readTodos contents
-  let newTodos = updateF targetTodoIDs oldTodos
-  case newTodos of
-    Just todos -> do
-      updateTodoFile todos
-      putStrLn $ "Todo(s) affected: " ++ show targetTodoIDs
+  let updateResult = updateF targetTodoIDs oldTodos
+  case updateResult of
+    Just (updatedTodos, newTodos) -> do
+      updateTodoFile newTodos
+      putStrLn $ "Todo(s) affected:\n" ++ unlines (map show updatedTodos)
     Nothing -> putStrLn $ "Could not find todo(s): " ++ show targetTodoIDs
 
 list :: IO ()
@@ -52,7 +51,9 @@ unprioritise :: [TodoID] -> IO ()
 unprioritise = updateTodoFileWith unprioritiseTodos
 
 remove :: [TodoID] -> IO ()
-remove = updateTodoFileWith removeTodos
+remove targetTodoIDs = do
+  putStrLn $ "Removing todos: " ++ show targetTodoIDs ++ "\n"
+  updateTodoFileWith removeTodos targetTodoIDs
 
 editTodoFile :: IO ()
 editTodoFile = do
@@ -60,6 +61,7 @@ editTodoFile = do
   return ()
 
 dispatch :: [String] -> IO ()
+-- FIXME: getOpts or something a bit more solid/less ridiculous than this
 dispatch [] = list
 dispatch ("list":[]) = list
 dispatch ("ls":[]) = list
