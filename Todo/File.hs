@@ -16,9 +16,6 @@ readTodoFile todoFilePath = do
   contents <- readFile todoFilePath
   return $ readTodos contents
 
-type UpdatedTodo = Todo
-type TodosUpdater = [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
-
 updateTodoFile :: FilePath -> [Todo] -> IO ()
 updateTodoFile todoFilePath newTodos = do
   let newContents = serialiseTodos newTodos
@@ -27,6 +24,10 @@ updateTodoFile todoFilePath newTodos = do
   hClose tempH
   removeFile todoFilePath
   renameFile tempName todoFilePath
+
+-- FIXME: maybe this doesn't belong here.. it's got interface stuff
+type UpdatedTodo = Todo
+type TodosUpdater = [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
 
 updateTodoFileWith ::  FilePath -> TodosUpdater -> [TodoID] -> IO ()
 updateTodoFileWith todoFilePath updateF targetTodoIDs = do
@@ -43,4 +44,3 @@ updateTodoFileWith todoFilePath updateF targetTodoIDs = do
 
 appendTodoFile :: FilePath -> [Todo] -> IO ()
 appendTodoFile todoFilePath todos = appendFile todoFilePath $ serialiseTodos todos
-

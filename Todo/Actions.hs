@@ -2,9 +2,9 @@ module Todo.Actions
 ( Todo
 , TodoID
 , readTodos
+, serialiseTodos
 , displayTodoList
 , displayTodos
-, serialiseTodos
 , archiveTodos
 , completeTodos
 , uncompleteTodos
@@ -20,10 +20,21 @@ import qualified Text.Printf as Printf
 import Todo.Todo
 type TodoID = Int
 
+-- ###############################################################
+-- FIXME: split into Todo.Marshalling
 readTodos :: String -> [Todo]
-readTodos todoTxt =
-  map Todo $ lines todoTxt
+-- FIXME: maybe this is not the right place .. but priority needs to be
+-- uppercased; even if I the input to this fn is lowercase
+readTodos todoTxt = map Todo $ lines todoTxt
 
+serialiseTodos :: [Todo] -> String
+serialiseTodos = unlines . map (\(Todo text) -> text)
+-- ###############################################################
+
+
+-- ###############################################################
+-- FIXME: split into Todo.Show
+-- FIXME: maybe call this displayNumberedTodoList
 displayTodoList :: [Todo] -> String
 displayTodoList todos = unlines todoList
                      where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
@@ -31,17 +42,14 @@ displayTodoList todos = unlines todoList
                            todoList = [showTodoID tID ++ show todo | (tID, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
                            blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
--- FIXME: dry this up
+-- FIXME: dry this up (it's almost the same as the above)
 displayTodos :: [Todo] -> String
 displayTodos todos = unlines todoList
                      where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
                            todoList = [show todo | (_, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
                            blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
+-- ###############################################################
 
-serialiseTodos :: [Todo] -> String
--- FIXME: maybe this is not the right place .. but priority needs to be
--- uppercased; even if I the input to this fn is lowercase
-serialiseTodos = unlines . map (\(Todo text) -> text)
 
 type ArchivedTodo = Todo
 archiveTodos :: [Todo] -> Maybe ([ArchivedTodo], [Todo])
@@ -73,8 +81,8 @@ updateTodos targetTodoIDs todos updateF =
     needsUpdate (tID, _) = tID `elem` targetTodoIDs
     todosWithIDs' = todosWithIDs todos
 
-
-
+-- FIXME: type UpdateResponse = Maybe ([UpdatedTodo], [Todo])
+-- and refactor
 prioritiseTodos :: Char -> [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
 prioritiseTodos priorityChar targetTodoIDs todos =
   updateTodos targetTodoIDs todos (prioritise priorityChar)
