@@ -12,6 +12,8 @@ import Todo.File
 
 -- ######################################################################
 -- FIXME: this belongs to a config file, not here
+-- TODO: pick up a ./todo.txt file in the current dir, otherwise use
+-- global
 todoTxtFilePath :: FilePath
 todoTxtFilePath = "./t.txt"
 
