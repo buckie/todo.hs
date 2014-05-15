@@ -1,5 +1,8 @@
 module TodoList.Actions
-( archiveTodos
+( TargetTodoIDs
+, TodoListUpdateAction
+, TodoListUpdateResponse
+, archiveTodos
 , completeTodos
 , uncompleteTodos
 , prioritiseTodos
@@ -12,35 +15,25 @@ import Data.List (partition)
 import TodoList.Todo
 import TodoList.List
 
-type UpdateResponse = Maybe (TodoList, TodoList)
-type UpdateAction = Todo -> Todo
+type TargetTodoIDs = [TodoID]
+type TodoListUpdateAction = [TodoID] -> TodoList -> TodoListUpdateResponse
+type TodoListUpdateResponse = Maybe (TodoList, TodoList)
+type TodoUpdateAction = Todo -> Todo
 
--- fst = a TodoList containing the todos that were updated
--- snd = The new todoList (fst + unaffected todos)
-partitionTodoList :: (Todo -> Bool) -> TodoList -> (TodoList, TodoList)
-partitionTodoList p =
-  foldl (\(left, right) listItem@(_, todo) ->
-    if p todo
-       then (left ++ [listItem], right)
-       else (left, right ++ [listItem])
-  ) ([],[])
+prioritiseTodos :: Char -> TodoListUpdateAction
+prioritiseTodos priorityInput targetTodoIDs todos =
+  updateTodos targetTodoIDs todos (prioritise priorityInput)
 
-archiveTodos :: TodoList -> UpdateResponse
-archiveTodos todoList =
-  case archivedTodos of
-    [] -> Nothing
-    _ -> Just (archivedTodos, newTodos)
-  where (archivedTodos, newTodos) = partitionTodoList completed todoList
+unprioritiseTodos :: TodoListUpdateAction
+unprioritiseTodos targetTodoIDs todos = updateTodos targetTodoIDs todos unprioritise
 
-removeTodos :: [TodoID] -> TodoList -> UpdateResponse
-removeTodos targetTodoIDs todoList =
-  if canUpdate targetTodoIDs todoList
-     then Just (removedTodosWithIDs, newTodosWithIDs)
-     else Nothing
-  where
-    (removedTodosWithIDs, newTodosWithIDs) = partition (\(tID, _) -> tID `elem` targetTodoIDs) todoList
+completeTodos :: TodoListUpdateAction
+completeTodos targetTodoIDs todos = updateTodos targetTodoIDs todos complete
 
-updateTodos :: [TodoID] -> TodoList -> UpdateAction -> UpdateResponse
+uncompleteTodos :: TodoListUpdateAction
+uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
+
+updateTodos :: TargetTodoIDs -> TodoList -> TodoUpdateAction -> TodoListUpdateResponse
 updateTodos targetTodoIDs todoList updateF =
   if canUpdate targetTodoIDs todoList
     then Just (onlyUpdated, everything)
@@ -54,20 +47,29 @@ updateTodos targetTodoIDs todoList updateF =
         update (tID, todo)= (tID, updateF todo)
         needsUpdate (tID, _) = tID `elem` targetTodoIDs
 
-prioritiseTodos :: Char -> [TodoID] -> TodoList -> UpdateResponse
-prioritiseTodos priorityInput targetTodoIDs todos =
-  updateTodos targetTodoIDs todos (prioritise priorityInput)
+archiveTodos :: TodoList -> TodoListUpdateResponse
+archiveTodos todoList =
+  case archivedTodos of
+    [] -> Nothing
+    _ -> Just (archivedTodos, newTodos)
+  where (archivedTodos, newTodos) = partitionTodoList completed todoList
 
-unprioritiseTodos :: [TodoID] -> TodoList -> UpdateResponse
-unprioritiseTodos targetTodoIDs todos = updateTodos targetTodoIDs todos unprioritise
+removeTodos :: TodoListUpdateAction
+removeTodos targetTodoIDs todoList =
+  if canUpdate targetTodoIDs todoList
+     then Just (removedTodosWithIDs, newTodosWithIDs)
+     else Nothing
+  where
+    (removedTodosWithIDs, newTodosWithIDs) = partition (\(tID, _) -> tID `elem` targetTodoIDs) todoList
 
-completeTodos :: [TodoID] -> TodoList -> UpdateResponse
-completeTodos targetTodoIDs todos = updateTodos targetTodoIDs todos complete
-
-uncompleteTodos :: [TodoID] -> TodoList -> UpdateResponse
-uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
-
-canUpdate :: [TodoID] -> TodoList -> Bool
+canUpdate :: TargetTodoIDs -> TodoList -> Bool
 canUpdate targetTodoIDs todoList =
   all (`elem` availableTodoIDs) targetTodoIDs
   where availableTodoIDs = map fst todoList
+
+partitionTodoList :: (Todo -> Bool) -> TodoList -> (TodoList, TodoList)
+partitionTodoList p =
+  foldl (\(left, right) listItem@(_, todo) ->
+    if p todo
+       then (left ++ [listItem], right)
+       else (left, right ++ [listItem])) ([],[])

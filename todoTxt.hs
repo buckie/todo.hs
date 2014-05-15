@@ -4,7 +4,6 @@ import System.Process (runCommand)
 import Control.Monad (when)
 import Data.Char (toUpper)
 
-import TodoList.Todo (Todo)
 import TodoList.List (TodoID, TodoList, displayTodoList, displayTodos)
 import TodoList.Actions
 import TodoList.Marshalling
@@ -20,20 +19,16 @@ getTodoTxtFilePath = getEnv "TODO_TXT_PATH"
 getArchiveFilePath :: IO FilePath
 getArchiveFilePath = getEnv "TODO_ARCHIVE_PATH"
 
-type UpdatedTodo = Todo
-type TodosUpdater = [TodoID] -> TodoList -> Maybe (TodoList, TodoList)
--- FIXME: this looks like the bastard child of Todo.Actions and Todo.File
---        but it also has some interface stuff..
---        .. it does too much, it doesn't belong here
-updateTodoFileWith ::  FilePath -> TodosUpdater -> [TodoID] -> IO ()
-updateTodoFileWith todoFilePath updateF targetTodoIDs = do
-  oldTodos <- readTodoFile todoFilePath
+updateTodoFileWith :: TodoListUpdateAction -> TargetTodoIDs -> IO ()
+updateTodoFileWith updateF targetTodoIDs = do
+  todoTxtFilePath <- getTodoTxtFilePath
+  oldTodos <- readTodoFile todoTxtFilePath
   let updateResult = updateF targetTodoIDs oldTodos
   case updateResult of
-    Just (updatedTodos, newTodos) -> do
-      updateTodoFile todoFilePath newTodos
-      putStrLn $ displayTodoList newTodos
-      putStrLn $ "Todo(s) affected:\n" ++ displayTodos updatedTodos
+    Just (updatedTodoList, newTodoList) -> do
+      updateTodoFile todoTxtFilePath newTodoList
+      putStrLn $ displayTodoList newTodoList
+      putStrLn $ "Todo(s) affected:\n" ++ displayTodos updatedTodoList
     Nothing -> do
       putStrLn $ displayTodoList oldTodos
       putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoIDs
@@ -48,42 +43,38 @@ add :: String -> IO ()
 add todoText = do
   todoTxtFilePath <- getTodoTxtFilePath
   putStrLn "Adding todo:"
-  let todos = readTodoList todoText
-  putStrLn $ displayTodos todos
-  appendTodoFile todoTxtFilePath todos
+  let newTodos = readTodoList todoText
+  putStrLn $ displayTodos newTodos
+  appendTodoFile todoTxtFilePath newTodos
 
-complete :: [TodoID] -> IO ()
+-- TODO: add autoarchive
+complete :: TargetTodoIDs -> IO ()
 complete targetTodoIDs = do
-  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn $ "Completing todo(s): " ++ show targetTodoIDs ++ "..."
   when (length targetTodoIDs > 3) (putStrLn "You are a machine!!")
   putStrLn ""
-  updateTodoFileWith todoTxtFilePath completeTodos targetTodoIDs
+  updateTodoFileWith completeTodos targetTodoIDs
 
-uncomplete :: [TodoID] -> IO ()
+uncomplete :: TargetTodoIDs -> IO ()
 uncomplete targetTodoIDs = do
-  todoTxtFilePath <- getTodoTxtFilePath
-  putStrLn $ "Hell yea! Reinstaing (un-completing) todo(s): " ++ show targetTodoIDs ++ "...\n"
-  updateTodoFileWith todoTxtFilePath uncompleteTodos targetTodoIDs
+  putStrLn $ "Hell yea! Officially reinstaing (un-completing) todo(s): " ++ show targetTodoIDs ++ "...\n"
+  updateTodoFileWith uncompleteTodos targetTodoIDs
 
-prioritise :: Char -> [TodoID] -> IO ()
+prioritise :: Char -> TargetTodoIDs -> IO ()
 prioritise priorityChar targetTodoIDs = do
-  todoTxtFilePath <- getTodoTxtFilePath
-  putStrLn $ "Prioritizing todo(s) (priority " ++ [toUpper priorityChar] ++ "): " ++ show targetTodoIDs ++ "...\n"
-  updateTodoFileWith todoTxtFilePath (prioritiseTodos priorityChar) targetTodoIDs
+  putStrLn $ "Prioritizing todo(s) with (" ++ [toUpper priorityChar] ++ "): " ++ show targetTodoIDs ++ "...\n"
+  updateTodoFileWith (prioritiseTodos priorityChar) targetTodoIDs
 
-unprioritise :: [TodoID] -> IO ()
+unprioritise :: TargetTodoIDs -> IO ()
 unprioritise targetTodoIDs = do
-  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn $ "Un-Prioritizing todo(s): " ++ show targetTodoIDs
-  updateTodoFileWith todoTxtFilePath unprioritiseTodos targetTodoIDs
+  updateTodoFileWith unprioritiseTodos targetTodoIDs
 
-remove :: [TodoID] -> IO ()
+remove :: TargetTodoIDs -> IO ()
 remove targetTodoIDs = do
-  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn $ "Removing todo(s): " ++ show targetTodoIDs
   putStrLn $ "They weren't that important anyway" ++ "\n"
-  updateTodoFileWith todoTxtFilePath removeTodos targetTodoIDs
+  updateTodoFileWith removeTodos targetTodoIDs
 
 archive :: IO ()
 archive = do
@@ -92,13 +83,13 @@ archive = do
   oldTodos <- readTodoFile todoTxtFilePath
   let archiveResult = archiveTodos oldTodos
   case archiveResult of
-    Just (todosToArchive, updatedTodos) -> do
+    Just (archivedTodoList, updatedTodoList) -> do
       putStrLn $ "Archiving todos (" ++ todoTxtFilePath ++ " -> " ++ archiveFilePath ++ " )...\n"
-      appendTodoFile archiveFilePath todosToArchive
-      updateTodoFile todoTxtFilePath updatedTodos
-      putStrLn $ displayTodoList updatedTodos
-      putStrLn $ show (length todosToArchive) ++ " todo(s) archived to " ++ archiveFilePath ++ ":\n"
-      putStrLn $ displayTodos todosToArchive
+      appendTodoFile archiveFilePath archivedTodoList
+      updateTodoFile todoTxtFilePath updatedTodoList
+      putStrLn $ displayTodoList updatedTodoList
+      putStrLn $ show (length archivedTodoList) ++ " todo(s) archived to " ++ archiveFilePath ++ ":\n"
+      putStrLn $ displayTodos archivedTodoList
     Nothing -> putStrLn $ colouredStr Red "Nothing to archive!"
 
 
