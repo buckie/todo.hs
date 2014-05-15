@@ -19,20 +19,6 @@ getTodoTxtFilePath = getEnv "TODO_TXT_PATH"
 getArchiveFilePath :: IO FilePath
 getArchiveFilePath = getEnv "TODO_ARCHIVE_PATH"
 
-updateTodoFileWith :: TodoListUpdateAction -> TargetTodoIDs -> IO ()
-updateTodoFileWith updateF targetTodoIDs = do
-  todoTxtFilePath <- getTodoTxtFilePath
-  oldTodos <- readTodoFile todoTxtFilePath
-  let updateResult = updateF targetTodoIDs oldTodos
-  case updateResult of
-    Just (updatedTodoList, newTodoList) -> do
-      updateTodoFile todoTxtFilePath newTodoList
-      putStrLn $ displayTodoList newTodoList
-      putStrLn $ "Todo(s) affected:\n" ++ displayTodos updatedTodoList
-    Nothing -> do
-      putStrLn $ displayTodoList oldTodos
-      putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoIDs
-
 list :: IO ()
 list = do
   todoTxtFilePath <- getTodoTxtFilePath
@@ -92,6 +78,19 @@ archive = do
       putStrLn $ displayTodos archivedTodoList
     Nothing -> putStrLn $ colouredStr Red "Nothing to archive!"
 
+updateTodoFileWith :: TodoListUpdateAction -> TargetTodoIDs -> IO ()
+updateTodoFileWith updateF targetTodoIDs = do
+  todoTxtFilePath <- getTodoTxtFilePath
+  oldTodos <- readTodoFile todoTxtFilePath
+  let updateResult = updateF targetTodoIDs oldTodos
+  case updateResult of
+    Just (updatedTodoList, newTodoList) -> do
+      updateTodoFile todoTxtFilePath newTodoList
+      putStrLn $ displayTodoList newTodoList
+      putStrLn $ "Todo(s) affected:\n" ++ displayTodos updatedTodoList
+    Nothing -> do
+      putStrLn $ displayTodoList oldTodos
+      putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoIDs
 
 editTodoFile :: IO ()
 editTodoFile = do
@@ -102,7 +101,7 @@ editTodoFile = do
   return ()
 
 -- FIXME: getOpts or something a bit more solid/less ridiculous than this
--- TODO: add help!
+-- TODO: add CLI help!
 dispatch :: [String] -> IO ()
 -- TODO: add filtered ls for contexts and projects
 dispatch [] = list
