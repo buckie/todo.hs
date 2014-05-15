@@ -10,6 +10,9 @@ import Todo.Actions
 import Todo.Marshalling
 import Todo.File
 
+import Todo.Utils
+import System.Console.ANSI -- FIXME: should not need to import this all the time
+
 -- ######################################################################
 -- FIXME: this belongs to a config file, not here
 -- TODO: pick up a ./todo.txt file in the current dir, otherwise use
@@ -37,7 +40,7 @@ updateTodoFileWith todoFilePath updateF targetTodoIDs = do
       putStrLn $ "Todo(s) affected:\n" ++ displayTodos updatedTodos
     Nothing -> do
       putStrLn $ displayTodoList oldTodos
-      putStrLn $ "Could not find todo(s): " ++ show targetTodoIDs
+      putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoIDs
 
 list :: IO ()
 list = do
@@ -91,7 +94,7 @@ archive = do
       putStrLn $ displayTodoList updatedTodos
       putStrLn $ show (length todosToArchive) ++ " todo(s) archived to " ++ archiveFilePath ++ ":\n"
       putStrLn $ displayTodos todosToArchive
-    Nothing -> putStrLn "Nothing to archive!"
+    Nothing -> putStrLn $ colouredStr Red "Nothing to archive!"
 
 
 editTodoFile :: IO ()
@@ -131,8 +134,8 @@ dispatch ("ar":[]) = archive
 dispatch ("edit":[]) = editTodoFile
 dispatch ("e":[]) = editTodoFile
 
-dispatch (invalidCommand:[]) = putStrLn $ "Command not recognized: " ++ invalidCommand
-dispatch _ = putStrLn "Command not recognized"
+dispatch (invalidCommand:[]) = putStrLn $ colouredStr Red $ "Command not recognized: " ++ invalidCommand
+dispatch _ = putStrLn $ colouredStr Red "Command not recognized"
 
 main :: IO ()
 main = do

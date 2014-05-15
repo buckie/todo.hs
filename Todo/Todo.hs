@@ -1,5 +1,6 @@
 module Todo.Todo
 ( Todo(..)
+, blank
 , completed
 , complete
 , uncomplete
@@ -11,22 +12,21 @@ module Todo.Todo
 ) where
 
 import Data.Char (toUpper)
+import qualified Data.Text as Text
+
+import Todo.Utils
 import System.Console.ANSI
 
 data Todo = Todo String deriving (Eq)
 
 instance Show Todo where
   show todo@(Todo text)
-    | completed todo = coloredTodoline White
+    | completed todo = colouredStr White text
     | otherwise = case priority todo of
-                    Priority 'A' -> coloredTodoline Yellow
-                    Priority 'B' -> coloredTodoline Green
-                    Priority 'C' -> coloredTodoline Blue
-                    _ -> todoLine
-    where todoLine = text
-          coloredTodoline color = setColor color ++ todoLine ++ resetColor
-          setColor c = setSGRCode [SetColor Foreground Dull c]
-          resetColor = setSGRCode []
+                    Priority 'A' -> colouredStr Yellow text
+                    Priority 'B' -> colouredStr Green text
+                    Priority 'C' -> colouredStr Blue text
+                    _ -> text
 
 instance Ord Todo where
   compare t1 t2
@@ -34,6 +34,12 @@ instance Ord Todo where
     | completed t1 = LT
     | completed t2 = GT
     | otherwise = compare (priority t1) (priority t2)
+
+blank :: Todo -> Bool
+blank (Todo text) =
+  blankLine text
+  where
+    blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
 completed :: Todo -> Bool
 completed (Todo text) =
@@ -64,17 +70,6 @@ priority todo =
     Just pri -> if pri `elem` ['A'..'E']
                   then Priority pri
                   else None
-  where
-
-priorityChar :: Todo -> Maybe Char
-priorityChar todo@(Todo text)
-  | completed todo = priorityChar $ uncomplete todo
-  | otherwise = case text of
-                  -- FIXME: use regexpes...
-                  ('(':pri:')':' ':_) -> if toUpper pri `elem` ['A'..'E']
-                                           then Just (toUpper pri)
-                                           else Nothing
-                  _ -> Nothing
 
 prioritised :: Todo -> Bool
 prioritised todo
@@ -95,3 +90,14 @@ prioritise priorityInput todo@(Todo text)
   | prioritised todo = prioritise priorityInput $ unprioritise todo
   | otherwise = Todo (priorityString ++ text)
   where priorityString = "(" ++ [toUpper priorityInput] ++ ") "
+
+priorityChar :: Todo -> Maybe Char
+priorityChar todo@(Todo text)
+  | completed todo = priorityChar $ uncomplete todo
+  | otherwise = case text of
+                  -- FIXME: use regexpes...
+                  ('(':pri:')':' ':_) -> if toUpper pri `elem` ['A'..'E']
+                                           then Just (toUpper pri)
+                                           else Nothing
+                  _ -> Nothing
+

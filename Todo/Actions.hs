@@ -62,9 +62,11 @@ completeTodos targetTodoIDs todos = updateTodos targetTodoIDs todos complete
 uncompleteTodos :: [TodoID] -> [Todo] -> UpdateResponse
 uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
 
-allIDsPresent :: [TodoID] -> [Todo] -> Bool
-allIDsPresent tIDs todos = all (`elem` [0..length todos - 1]) tIDs
-
 canUpdate :: [TodoID] -> [Todo] -> Bool
--- FIXME: make sure that none of the IDs aren't for "blank" todos either
-canUpdate = allIDsPresent
+-- FIXME: keeping the "blank" todos around is getting cumbersome
+--        i still really like the whitespace in todo.txt tho
+canUpdate targetTodoIDs todos =
+  all (`elem` idsOfNonBlankTodos) targetTodoIDs
+  where
+    idsOfNonBlankTodos = map fst $ todoList todos
+

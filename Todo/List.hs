@@ -6,7 +6,6 @@ module Todo.List
 , displayTodos
 ) where
 
-import qualified Data.Text as Text
 import qualified Text.Printf as Printf
 import Data.List (sortBy)
 
@@ -18,9 +17,8 @@ allTodosWithIDs :: [Todo] -> [(TodoID, Todo)]
 allTodosWithIDs = zip [(0::Int)..]
 
 todoList :: [Todo] -> [(TodoID, Todo)]
-todoList todos = filter (\(_, Todo tText) -> not $ blank tText) sortedTodosWithIDs
+todoList todos = filter (\(_, todo) -> not $ blank todo) sortedTodosWithIDs
                  where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ allTodosWithIDs todos
-                       blank = ([]==) . Text.unpack . Text.strip . Text.pack
 
 -- Display the a todo list, with nicely formatted numbers
 displayTodoList :: [Todo] -> String
