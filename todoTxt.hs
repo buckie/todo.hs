@@ -4,13 +4,13 @@ import System.Process (runCommand)
 import Control.Monad (when)
 import Data.Char (toUpper)
 
-import Todo.Todo (Todo)
-import Todo.List (TodoID, TodoList, displayTodoList, displayTodos)
-import Todo.Actions
-import Todo.Marshalling
-import Todo.File
+import TodoList.Todo (Todo)
+import TodoList.List (TodoID, TodoList, displayTodoList, displayTodos)
+import TodoList.Actions
+import TodoList.Marshalling
+import TodoList.File
 
-import Todo.Utils
+import TodoList.Utils
 import System.Console.ANSI -- FIXME: should not need to import this all the time
 
 -- ######################################################################

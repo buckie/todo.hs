@@ -1,4 +1,4 @@
-module Todo.Actions -- FIXME: all these act on a todo list...
+module TodoList.Actions
 ( archiveTodos
 , completeTodos
 , uncompleteTodos
@@ -9,8 +9,8 @@ module Todo.Actions -- FIXME: all these act on a todo list...
 
 import Data.List (partition)
 
-import Todo.Todo
-import Todo.List
+import TodoList.Todo
+import TodoList.List
 
 type UpdateResponse = Maybe (TodoList, TodoList)
 type UpdateAction = Todo -> Todo

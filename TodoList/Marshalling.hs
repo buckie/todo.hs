@@ -1,4 +1,4 @@
-module Todo.Marshalling
+module TodoList.Marshalling
 ( readTodoList
 , serialiseTodoList
 ) where
@@ -9,14 +9,11 @@ import Control.Arrow (second)
 import qualified Data.Text as Text
 import qualified Data.Map as Map
 
-import Todo.Todo
-import Todo.List
+import TodoList.Todo
+import TodoList.List
 
 blankLine :: String -> Bool
 blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
-
--- FIXME: this should be the only place that knows about blank lines in
--- todo.txt
 
 readTodoList :: String -> TodoList
 readTodoList todoTxt = [(tID, readTodo todoLine) | (tID, todoLine) <- linesWithIDs, not $ blankLine todoLine]
@@ -31,8 +28,6 @@ readTodo todoLine =
         priorityChar' = priorityChar todo
 
 serialiseTodoList :: TodoList -> String
--- FIXME: this is where we "add in" blank lines for to fill in the gaps in
--- between [TodoID]
 serialiseTodoList todoList =
   unlines $ map todoOrBlankLine lineIDs
   where

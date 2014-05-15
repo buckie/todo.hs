@@ -1,4 +1,4 @@
-module Todo.List
+module TodoList.List
 ( TodoID
 , TodoList
 , sortTodoList
@@ -9,7 +9,7 @@ module Todo.List
 import qualified Text.Printf as Printf
 import Data.List (sortBy)
 
-import Todo.Todo
+import TodoList.Todo
 
 type TodoID = Int
 type TodoList = [(TodoID, Todo)]

@@ -1,4 +1,4 @@
-module Todo.Utils
+module TodoList.Utils
 ( colouredStr ) where
 
 import System.Console.ANSI

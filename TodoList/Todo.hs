@@ -1,4 +1,4 @@
-module Todo.Todo
+module TodoList.Todo
 ( Todo(..)
 , completed
 , complete
@@ -12,7 +12,7 @@ module Todo.Todo
 
 import Data.Char (toUpper)
 
-import Todo.Utils
+import TodoList.Utils
 import System.Console.ANSI
 
 data Todo = Todo String deriving (Eq)
