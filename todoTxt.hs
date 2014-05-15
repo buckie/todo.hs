@@ -21,6 +21,9 @@ archiveFilePath = "./archive.txt"
 
 type UpdatedTodo = Todo
 type TodosUpdater = [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
+-- FIXME: this looks like the bastard child of Todo.Actions and Todo.File
+--        but it also has some interface stuff..
+--        .. it does too much, it doesn't belong here
 updateTodoFileWith ::  FilePath -> TodosUpdater -> [TodoID] -> IO ()
 updateTodoFileWith todoFilePath updateF targetTodoIDs = do
   oldTodos <- readTodoFile todoFilePath
