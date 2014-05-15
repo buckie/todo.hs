@@ -4,7 +4,7 @@ import System.Process (runCommand)
 import Control.Monad (when)
 import Data.Char (toUpper)
 
-import TodoList.List (displayTodoList, displayTodos)
+import TodoList.List (displayTodoList, displayOnlyTodos)
 import TodoList.Actions
 import TodoList.Marshalling
 import TodoList.File
@@ -30,10 +30,9 @@ add todoText = do
   todoTxtFilePath <- getTodoTxtFilePath
   putStrLn "Adding todo:"
   let newTodos = readTodoList todoText
-  putStrLn $ displayTodos newTodos
+  putStrLn $ displayOnlyTodos newTodos
   appendTodoFile todoTxtFilePath newTodos
 
--- TODO: add autoarchive
 complete :: TargetTodoIDs -> IO ()
 complete targetTodoIDs = do
   putStrLn $ "Completing todo(s): " ++ show targetTodoIDs ++ "..."
@@ -75,7 +74,7 @@ archive = do
       updateTodoFile todoTxtFilePath updatedTodoList
       putStrLn $ displayTodoList updatedTodoList
       putStrLn $ show (length archivedTodoList) ++ " todo(s) archived to " ++ archiveFilePath ++ ":\n"
-      putStrLn $ displayTodos archivedTodoList
+      putStrLn $ displayOnlyTodos archivedTodoList
     Nothing -> putStrLn $ colouredStr Red "Nothing to archive!"
 
 updateTodoFileWith :: TodoListUpdateAction -> TargetTodoIDs -> IO ()
@@ -87,7 +86,7 @@ updateTodoFileWith updateF targetTodoIDs = do
     Just (updatedTodoList, newTodoList) -> do
       updateTodoFile todoTxtFilePath newTodoList
       putStrLn $ displayTodoList newTodoList
-      putStrLn $ "Todo(s) affected:\n" ++ displayTodos updatedTodoList
+      putStrLn $ "Todo(s) affected:\n" ++ displayOnlyTodos updatedTodoList
     Nothing -> do
       putStrLn $ displayTodoList oldTodos
       putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoIDs

@@ -17,7 +17,7 @@ blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
 readTodoList :: String -> TodoList
 readTodoList todoTxt = [(tID, readTodo todoLine) | (tID, todoLine) <- linesWithIDs, not $ blankLine todoLine]
-                    where linesWithIDs = zip [(1::Int)..] (lines todoTxt)
+                       where linesWithIDs = zip [(1::Int)..] (lines todoTxt)
 
 readTodo :: String -> Todo
 readTodo todoLine =

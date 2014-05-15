@@ -45,8 +45,9 @@ complete todo@(Todo text)
 
 uncomplete :: Todo -> Todo
 uncomplete todo@(Todo text)
-  | completed todo = Todo (drop 2 text)
+  | completed todo = Todo (drop completionStrLength text)
   | otherwise = todo
+  where completionStrLength = 2
 
 data Priority = None | Priority Char deriving (Eq)
 instance Ord Priority where
@@ -71,11 +72,13 @@ prioritised todo
 
 unprioritise ::Todo -> Todo
 unprioritise todo@(Todo text)
-  | completed todo && prioritised todo = complete . unprioritise $ uncomplete todo
-  | prioritised todo = Todo (drop 4 text)
+  | completed todo = complete . unprioritise $ uncomplete todo
+  | prioritised todo = Todo (drop priorityStrLength text)
   | otherwise = todo
+  where priorityStrLength = 4
 
 prioritise :: Char -> Todo -> Todo
+-- FIXME: are we having priorities `elem` ['A'..'E'] or what
 prioritise priorityInput todo@(Todo text)
   | completed todo = complete . prioritise priorityInput $ uncomplete todo
   | prioritised todo = prioritise priorityInput $ unprioritise todo
@@ -86,9 +89,7 @@ priorityChar :: Todo -> Maybe Char
 priorityChar todo@(Todo text)
   | completed todo = priorityChar $ uncomplete todo
   | otherwise = case text of
-                  -- FIXME: use regexpes...
                   ('(':pri:')':' ':_) -> if toUpper pri `elem` ['A'..'E']
                                            then Just (toUpper pri)
                                            else Nothing
                   _ -> Nothing
-
