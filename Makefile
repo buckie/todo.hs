@@ -20,7 +20,7 @@ __post_build:
 
 __clean_junk:
 	rm -f *.o *.hi
-	rm -f Todo/*.o Todo/*.hi
+	rm -f TodoList/*.o TodoList/*.hi
 
 __fake_todo:
 	cp t.txt.sample t.txt
