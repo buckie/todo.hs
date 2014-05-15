@@ -1,7 +1,5 @@
 module Todo.Actions -- FIXME: all these act on a todo list...
-( Todo
-, TodoID
-, archiveTodos
+( archiveTodos
 , completeTodos
 , uncompleteTodos
 , prioritiseTodos

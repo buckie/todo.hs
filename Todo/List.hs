@@ -22,8 +22,6 @@ todoList todos = filter (\(_, Todo tText) -> not $ blank tText) sortedTodosWithI
                  where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ allTodosWithIDs todos
                        blank = ([]==) . Text.unpack . Text.strip . Text.pack
 
-
-
 -- Display the a todo list, with nicely formatted numbers
 displayTodoList :: [Todo] -> String
 displayTodoList todos = unlines [showTodoID tID ++ show todo | (tID, todo) <- todoList todos]

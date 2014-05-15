@@ -4,7 +4,8 @@ import System.Process (runCommand)
 import Control.Monad (when)
 import Data.Char (toUpper)
 
-import Todo.List
+import Todo.Todo (Todo)
+import Todo.List (TodoID, displayTodoList, displayTodos)
 import Todo.Actions
 import Todo.Marshalling
 import Todo.File
