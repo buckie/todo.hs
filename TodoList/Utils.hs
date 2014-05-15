@@ -1,10 +1,11 @@
 module TodoList.Utils
-( colouredStr ) where
+( colouredStr
+, Color(..)
+) where
 
 import System.Console.ANSI
 
-type Colour = Color -- :P
-colouredStr :: Colour -> String -> String
+colouredStr :: Color -> String -> String
 colouredStr colour str =
   setColor colour ++ str ++ resetColor
   where

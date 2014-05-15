@@ -13,7 +13,6 @@ module TodoList.Todo
 import Data.Char (toUpper)
 
 import TodoList.Utils
-import System.Console.ANSI
 
 data Todo = Todo String deriving (Eq)
 

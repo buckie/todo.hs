@@ -11,7 +11,6 @@ import TodoList.Marshalling
 import TodoList.File
 
 import TodoList.Utils
-import System.Console.ANSI -- FIXME: should not need to import this all the time
 
 -- ######################################################################
 -- FIXME: this belongs to a config file, not here
