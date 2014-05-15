@@ -4,6 +4,7 @@ module Todo.Todo
 , complete
 , uncomplete
 , priority
+, priorityChar
 , prioritised
 , prioritise
 , unprioritise
@@ -57,22 +58,30 @@ instance Ord Priority where
   compare (Priority p1) (Priority p2) = flip compare p1 p2
 
 priority :: Todo -> Priority
-priority (Todo text) = -- FIXME: use regexpes...
-  case priorityChar text of
-    Just pri -> if pri `elem` ['A'..'E']
-                  then Priority (toUpper pri)
-                  else None
+priority todo =
+  case priorityChar todo of
     Nothing -> None
+    Just pri -> if pri `elem` ['A'..'E']
+                  then Priority pri
+                  else None
   where
-    priorityChar :: String -> Maybe Char
-    priorityChar ('(':pri:')':_) = Just pri -- incomplete todo with priority
-    priorityChar ('x':' ':'(':pri:')':_) = Just pri -- complete todo with priority
-    priorityChar _ = Nothing
+
+priorityChar :: Todo -> Maybe Char
+priorityChar todo@(Todo text)
+  | completed todo = priorityChar $ uncomplete todo
+  | otherwise = case text of
+                  -- FIXME: use regexpes...
+                  ('(':pri:')':' ':_) -> if toUpper pri `elem` ['A'..'E']
+                                           then Just (toUpper pri)
+                                           else Nothing
+                  _ -> Nothing
 
 prioritised :: Todo -> Bool
-prioritised todo = case priority todo of
-                     None -> False
-                     Priority _ -> True
+prioritised todo
+  | completed todo = prioritised $ uncomplete todo
+  | otherwise = case priorityChar todo of
+                  Nothing -> False
+                  Just _ -> True
 
 unprioritise ::Todo -> Todo
 unprioritise todo@(Todo text)
@@ -81,8 +90,8 @@ unprioritise todo@(Todo text)
   | otherwise = todo
 
 prioritise :: Char -> Todo -> Todo
-prioritise priorityChar todo@(Todo text)
-  | completed todo = complete . prioritise priorityChar $ uncomplete todo
-  | prioritised todo = prioritise priorityChar $ unprioritise todo
+prioritise priorityInput todo@(Todo text)
+  | completed todo = complete . prioritise priorityInput $ uncomplete todo
+  | prioritised todo = prioritise priorityInput $ unprioritise todo
   | otherwise = Todo (priorityString ++ text)
-  where priorityString = "(" ++ [toUpper priorityChar] ++ ") "
+  where priorityString = "(" ++ [toUpper priorityInput] ++ ") "
