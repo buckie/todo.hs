@@ -13,6 +13,9 @@ clean:
 	rm -f t
 	rm -f archive.txt t.txt
 
+install:
+	mv ./t /usr/local/bin
+
 ls_todo:
 	ag TODO
 
