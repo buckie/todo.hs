@@ -1,4 +1,4 @@
-import System.Environment (getArgs)
+import System.Environment (getArgs, getEnv)
 import System.Process (runCommand)
 
 import Control.Monad (when)
@@ -12,16 +12,13 @@ import TodoList.File
 
 import TodoList.Utils
 
--- ######################################################################
--- FIXME: this belongs to a config file, not here
 -- TODO: pick up a ./todo.txt file in the current dir, otherwise use
 -- global
-todoTxtFilePath :: FilePath
-todoTxtFilePath = "./t.txt"
+getTodoTxtFilePath :: IO FilePath
+getTodoTxtFilePath = getEnv "TODO_TXT_PATH"
 
-archiveFilePath :: FilePath
-archiveFilePath = "./archive.txt"
--- ######################################################################
+getArchiveFilePath :: IO FilePath
+getArchiveFilePath = getEnv "TODO_ARCHIVE_PATH"
 
 type UpdatedTodo = Todo
 type TodosUpdater = [TodoID] -> TodoList -> Maybe (TodoList, TodoList)
@@ -43,11 +40,13 @@ updateTodoFileWith todoFilePath updateF targetTodoIDs = do
 
 list :: IO ()
 list = do
+  todoTxtFilePath <- getTodoTxtFilePath
   todos <- readTodoFile todoTxtFilePath
   putStrLn $ displayTodoList todos
 
 add :: String -> IO ()
 add todoText = do
+  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn "Adding todo:"
   let todos = readTodoList todoText
   putStrLn $ displayTodos todos
@@ -55,6 +54,7 @@ add todoText = do
 
 complete :: [TodoID] -> IO ()
 complete targetTodoIDs = do
+  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn $ "Completing todo(s): " ++ show targetTodoIDs ++ "..."
   when (length targetTodoIDs > 3) (putStrLn "You are a machine!!")
   putStrLn ""
@@ -62,27 +62,33 @@ complete targetTodoIDs = do
 
 uncomplete :: [TodoID] -> IO ()
 uncomplete targetTodoIDs = do
+  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn $ "Hell yea! Reinstaing (un-completing) todo(s): " ++ show targetTodoIDs ++ "...\n"
   updateTodoFileWith todoTxtFilePath uncompleteTodos targetTodoIDs
 
 prioritise :: Char -> [TodoID] -> IO ()
 prioritise priorityChar targetTodoIDs = do
+  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn $ "Prioritizing todo(s) (priority " ++ [toUpper priorityChar] ++ "): " ++ show targetTodoIDs ++ "...\n"
   updateTodoFileWith todoTxtFilePath (prioritiseTodos priorityChar) targetTodoIDs
 
 unprioritise :: [TodoID] -> IO ()
 unprioritise targetTodoIDs = do
+  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn $ "Un-Prioritizing todo(s): " ++ show targetTodoIDs
   updateTodoFileWith todoTxtFilePath unprioritiseTodos targetTodoIDs
 
 remove :: [TodoID] -> IO ()
 remove targetTodoIDs = do
+  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn $ "Removing todo(s): " ++ show targetTodoIDs
   putStrLn $ "They weren't that important anyway" ++ "\n"
   updateTodoFileWith todoTxtFilePath removeTodos targetTodoIDs
 
 archive :: IO ()
 archive = do
+  archiveFilePath <- getArchiveFilePath
+  todoTxtFilePath <- getTodoTxtFilePath
   oldTodos <- readTodoFile todoTxtFilePath
   let archiveResult = archiveTodos oldTodos
   case archiveResult of
@@ -98,6 +104,7 @@ archive = do
 
 editTodoFile :: IO ()
 editTodoFile = do
+  todoTxtFilePath <- getTodoTxtFilePath
   putStrLn "Editing todo(s) with $EDITOR"
   putStrLn "Mr. Sulu, you have the conn."
   _ <- runCommand $ "$EDITOR " ++ todoTxtFilePath
