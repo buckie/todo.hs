@@ -34,20 +34,14 @@ serialiseTodos = unlines . map (\(Todo text) -> text)
 
 -- ###############################################################
 -- FIXME: split into Todo.Show
--- FIXME: maybe call this displayNumberedTodoList
-displayTodoList :: [Todo] -> String
-displayTodoList todos = unlines todoList
-                     where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
-                           showTodoID = Printf.printf "%3d "
-                           todoList = [showTodoID tID ++ show todo | (tID, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
-                           blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
--- FIXME: dry this up (it's almost the same as the above)
+displayTodoList :: [Todo] -> String
+displayTodoList todos = unlines [showTodoID tID ++ show todo | (tID, todo) <- todoList todos]
+                        where showTodoID = Printf.printf "%3d "
+
 displayTodos :: [Todo] -> String
-displayTodos todos = unlines todoList
-                     where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ todosWithIDs todos
-                           todoList = [show todo | (_, todo@(Todo text)) <- sortedTodosWithIDs, not $ blankLine text]
-                           blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
+displayTodos todos = unlines [ show todo | (_, todo) <- todoList todos]
+
 -- ###############################################################
 
 
@@ -79,7 +73,7 @@ updateTodos targetTodoIDs todos updateF =
         oldTodo = snd todoWithID
 
     needsUpdate (tID, _) = tID `elem` targetTodoIDs
-    todosWithIDs' = todosWithIDs todos
+    todosWithIDs' = allTodosWithIDs todos
 
 -- FIXME: type UpdateResponse = Maybe ([UpdatedTodo], [Todo])
 -- and refactor
@@ -103,12 +97,17 @@ removeTodos targetTodoIDs todos =
      then Just (removedTodos, newTodos)
      else Nothing
   where
-    (removedTodosWithIDs, newTodosWithIDs) = partition (\(tID, _) -> tID `elem` targetTodoIDs) $ todosWithIDs todos
+    (removedTodosWithIDs, newTodosWithIDs) = partition (\(tID, _) -> tID `elem` targetTodoIDs) $ allTodosWithIDs todos
     removedTodos = map snd removedTodosWithIDs
     newTodos = map snd newTodosWithIDs
 
 allIDsPresent :: [TodoID] -> [Todo] -> Bool
 allIDsPresent tIDs todos = all (`elem` [0..length todos - 1]) tIDs
 
-todosWithIDs :: [Todo] -> [(TodoID, Todo)]
-todosWithIDs = zip [(0::Int)..]
+allTodosWithIDs :: [Todo] -> [(TodoID, Todo)]
+allTodosWithIDs = zip [(0::Int)..]
+
+todoList :: [Todo] -> [(TodoID, Todo)]
+todoList todos = filter (\(_, Todo tText) -> not $ blank tText) sortedTodosWithIDs
+                 where sortedTodosWithIDs = sortBy (\(_, t1) (_, t2) -> compare t1 t2) $ allTodosWithIDs todos
+                       blank = ([]==) . Text.unpack . Text.strip . Text.pack
