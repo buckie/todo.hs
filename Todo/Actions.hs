@@ -24,7 +24,7 @@ archiveTodos todos =
 
 removeTodos :: [TodoID] -> [Todo] -> UpdateResponse
 removeTodos targetTodoIDs todos =
-  if allIDsPresent targetTodoIDs todos
+  if canUpdate targetTodoIDs todos
      then Just (removedTodos, newTodos)
      else Nothing
   where
@@ -35,27 +35,23 @@ removeTodos targetTodoIDs todos =
 type UpdateAction = Todo -> AffectedTodo
 updateTodos :: [TodoID] -> [Todo] -> UpdateAction -> UpdateResponse
 updateTodos targetTodoIDs todos updateF =
-  if canUpdate
+  if canUpdate targetTodoIDs todos
     then Just (onlyUpdatedTodos, newTodos)
     else Nothing
   where
-    canUpdate = allIDsPresent targetTodoIDs todos
-
     (onlyUpdatedTodos, newTodos) = foldl parseTodos ([],[]) todosWithIDs'
-
     parseTodos (onlyUpdatedTodos', newTodos') todoWithID
       | needsUpdate todoWithID = (onlyUpdatedTodos' ++ [updatedTodo], newTodos' ++ [updatedTodo])
       | otherwise = (onlyUpdatedTodos', newTodos' ++ [oldTodo])
       where
         updatedTodo = updateF $ snd todoWithID
         oldTodo = snd todoWithID
-
     needsUpdate (tID, _) = tID `elem` targetTodoIDs
     todosWithIDs' = allTodosWithIDs todos
 
 prioritiseTodos :: Char -> [TodoID] -> [Todo] -> UpdateResponse
-prioritiseTodos priorityChar targetTodoIDs todos =
-  updateTodos targetTodoIDs todos (prioritise priorityChar)
+prioritiseTodos priorityInput targetTodoIDs todos =
+  updateTodos targetTodoIDs todos (prioritise priorityInput)
 
 unprioritiseTodos :: [TodoID] -> [Todo] -> UpdateResponse
 unprioritiseTodos targetTodoIDs todos = updateTodos targetTodoIDs todos unprioritise
@@ -68,3 +64,7 @@ uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
 
 allIDsPresent :: [TodoID] -> [Todo] -> Bool
 allIDsPresent tIDs todos = all (`elem` [0..length todos - 1]) tIDs
+
+canUpdate :: [TodoID] -> [Todo] -> Bool
+-- FIXME: make sure that none of the IDs aren't for "blank" todos either
+canUpdate = allIDsPresent
