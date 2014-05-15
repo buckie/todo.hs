@@ -13,6 +13,15 @@ clean:
 	rm -f t
 	rm -f archive.txt t.txt
 
+ls_todo:
+	ag TODO
+
+ls_fix:
+	ag FIXME
+
+seed:
+	make __fake_todo
+
 __post_build:
 	mv todoTxt t
 	make __fake_todo
@@ -24,9 +33,6 @@ __clean_junk:
 
 __fake_todo:
 	cp t.txt.sample t.txt
-
-seed:
-	make __fake_todo
 
 # I'm so sorry about this:
 fetch_deps:
