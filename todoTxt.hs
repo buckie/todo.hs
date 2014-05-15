@@ -5,7 +5,7 @@ import Control.Monad (when)
 import Data.Char (toUpper)
 
 import Todo.Todo (Todo)
-import Todo.List (TodoID, displayTodoList, displayTodos)
+import Todo.List (TodoID, TodoList, displayTodoList, displayTodos)
 import Todo.Actions
 import Todo.Marshalling
 import Todo.File
@@ -25,7 +25,7 @@ archiveFilePath = "./archive.txt"
 -- ######################################################################
 
 type UpdatedTodo = Todo
-type TodosUpdater = [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
+type TodosUpdater = [TodoID] -> TodoList -> Maybe (TodoList, TodoList)
 -- FIXME: this looks like the bastard child of Todo.Actions and Todo.File
 --        but it also has some interface stuff..
 --        .. it does too much, it doesn't belong here
@@ -50,7 +50,7 @@ list = do
 add :: String -> IO ()
 add todoText = do
   putStrLn "Adding todo:"
-  let todos = readTodos todoText
+  let todos = readTodoList todoText
   putStrLn $ displayTodos todos
   appendTodoFile todoTxtFilePath todos
 

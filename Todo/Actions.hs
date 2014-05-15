@@ -12,61 +12,62 @@ import Data.List (partition)
 import Todo.Todo
 import Todo.List
 
-type AffectedTodo = Todo
-type UpdateResponse = Maybe ([AffectedTodo], [Todo])
+type UpdateResponse = Maybe (TodoList, TodoList)
+type UpdateAction = Todo -> Todo
 
-archiveTodos :: [Todo] -> UpdateResponse
-archiveTodos todos =
+-- fst = a TodoList containing the todos that were updated
+-- snd = The new todoList (fst + unaffected todos)
+partitionTodoList :: (Todo -> Bool) -> TodoList -> (TodoList, TodoList)
+partitionTodoList p =
+  foldl (\(left, right) listItem@(_, todo) ->
+    if p todo
+       then (left ++ [listItem], right)
+       else (left, right ++ [listItem])
+  ) ([],[])
+
+archiveTodos :: TodoList -> UpdateResponse
+archiveTodos todoList =
   case archivedTodos of
     [] -> Nothing
     _ -> Just (archivedTodos, newTodos)
-  where (archivedTodos, newTodos) = partition completed todos
+  where (archivedTodos, newTodos) = partitionTodoList completed todoList
 
-removeTodos :: [TodoID] -> [Todo] -> UpdateResponse
-removeTodos targetTodoIDs todos =
-  if canUpdate targetTodoIDs todos
-     then Just (removedTodos, newTodos)
+removeTodos :: [TodoID] -> TodoList -> UpdateResponse
+removeTodos targetTodoIDs todoList =
+  if canUpdate targetTodoIDs todoList
+     then Just (removedTodosWithIDs, newTodosWithIDs)
      else Nothing
   where
-    (removedTodosWithIDs, newTodosWithIDs) = partition (\(tID, _) -> tID `elem` targetTodoIDs) $ allTodosWithIDs todos
-    removedTodos = map snd removedTodosWithIDs
-    newTodos = map snd newTodosWithIDs
+    (removedTodosWithIDs, newTodosWithIDs) = partition (\(tID, _) -> tID `elem` targetTodoIDs) todoList
 
-type UpdateAction = Todo -> AffectedTodo
-updateTodos :: [TodoID] -> [Todo] -> UpdateAction -> UpdateResponse
-updateTodos targetTodoIDs todos updateF =
-  if canUpdate targetTodoIDs todos
-    then Just (onlyUpdatedTodos, newTodos)
+updateTodos :: [TodoID] -> TodoList -> UpdateAction -> UpdateResponse
+updateTodos targetTodoIDs todoList updateF =
+  if canUpdate targetTodoIDs todoList
+    then Just (onlyUpdated, everything)
     else Nothing
   where
-    (onlyUpdatedTodos, newTodos) = foldl parseTodos ([],[]) todosWithIDs'
-    parseTodos (onlyUpdatedTodos', newTodos') todoWithID
-      | needsUpdate todoWithID = (onlyUpdatedTodos' ++ [updatedTodo], newTodos' ++ [updatedTodo])
-      | otherwise = (onlyUpdatedTodos', newTodos' ++ [oldTodo])
+    (onlyUpdated, everything) = foldl updateIfNeeded ([],[]) todoList
+    updateIfNeeded (onlyUpdated', everything') listItem
+      | needsUpdate listItem = (onlyUpdated' ++ [update listItem], everything' ++ [update listItem])
+      | otherwise = (onlyUpdated', everything' ++ [listItem])
       where
-        updatedTodo = updateF $ snd todoWithID
-        oldTodo = snd todoWithID
-    needsUpdate (tID, _) = tID `elem` targetTodoIDs
-    todosWithIDs' = allTodosWithIDs todos
+        update (tID, todo)= (tID, updateF todo)
+        needsUpdate (tID, _) = tID `elem` targetTodoIDs
 
-prioritiseTodos :: Char -> [TodoID] -> [Todo] -> UpdateResponse
+prioritiseTodos :: Char -> [TodoID] -> TodoList -> UpdateResponse
 prioritiseTodos priorityInput targetTodoIDs todos =
   updateTodos targetTodoIDs todos (prioritise priorityInput)
 
-unprioritiseTodos :: [TodoID] -> [Todo] -> UpdateResponse
+unprioritiseTodos :: [TodoID] -> TodoList -> UpdateResponse
 unprioritiseTodos targetTodoIDs todos = updateTodos targetTodoIDs todos unprioritise
 
-completeTodos :: [TodoID] -> [Todo] -> UpdateResponse
+completeTodos :: [TodoID] -> TodoList -> UpdateResponse
 completeTodos targetTodoIDs todos = updateTodos targetTodoIDs todos complete
 
-uncompleteTodos :: [TodoID] -> [Todo] -> UpdateResponse
+uncompleteTodos :: [TodoID] -> TodoList -> UpdateResponse
 uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
 
-canUpdate :: [TodoID] -> [Todo] -> Bool
--- FIXME: keeping the "blank" todos around is getting cumbersome
---        i still really like the whitespace in todo.txt tho
-canUpdate targetTodoIDs todos =
-  all (`elem` idsOfNonBlankTodos) targetTodoIDs
-  where
-    idsOfNonBlankTodos = map fst $ todoList todos
-
+canUpdate :: [TodoID] -> TodoList -> Bool
+canUpdate targetTodoIDs todoList =
+  all (`elem` availableTodoIDs) targetTodoIDs
+  where availableTodoIDs = map fst todoList

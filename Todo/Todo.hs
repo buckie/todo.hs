@@ -1,6 +1,5 @@
 module Todo.Todo
 ( Todo(..)
-, blank
 , completed
 , complete
 , uncomplete
@@ -12,7 +11,6 @@ module Todo.Todo
 ) where
 
 import Data.Char (toUpper)
-import qualified Data.Text as Text
 
 import Todo.Utils
 import System.Console.ANSI
@@ -34,12 +32,6 @@ instance Ord Todo where
     | completed t1 = LT
     | completed t2 = GT
     | otherwise = compare (priority t1) (priority t2)
-
-blank :: Todo -> Bool
-blank (Todo text) =
-  blankLine text
-  where
-    blankLine = ([]==) . Text.unpack . Text.strip . Text.pack
 
 completed :: Todo -> Bool
 completed (Todo text) =
