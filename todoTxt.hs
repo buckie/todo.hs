@@ -4,7 +4,9 @@ import System.Process (runCommand)
 import Control.Monad (when)
 import Data.Char (toUpper)
 
+import Todo.List
 import Todo.Actions
+import Todo.Marshalling
 import Todo.File
 
 -- ######################################################################
@@ -15,6 +17,21 @@ todoTxtFilePath = "./t.txt"
 archiveFilePath :: FilePath
 archiveFilePath = "./archive.txt"
 -- ######################################################################
+
+type UpdatedTodo = Todo
+type TodosUpdater = [TodoID] -> [Todo] -> Maybe ([UpdatedTodo], [Todo])
+updateTodoFileWith ::  FilePath -> TodosUpdater -> [TodoID] -> IO ()
+updateTodoFileWith todoFilePath updateF targetTodoIDs = do
+  oldTodos <- readTodoFile todoFilePath
+  let updateResult = updateF targetTodoIDs oldTodos
+  case updateResult of
+    Just (updatedTodos, newTodos) -> do
+      updateTodoFile todoFilePath newTodos
+      putStrLn $ displayTodoList newTodos
+      putStrLn $ "Todo(s) affected:\n" ++ displayTodos updatedTodos
+    Nothing -> do
+      putStrLn $ displayTodoList oldTodos
+      putStrLn $ "Could not find todo(s): " ++ show targetTodoIDs
 
 list :: IO ()
 list = do
