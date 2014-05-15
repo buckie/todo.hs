@@ -105,7 +105,7 @@ archive = do
 editTodoFile :: IO ()
 editTodoFile = do
   todoTxtFilePath <- getTodoTxtFilePath
-  putStrLn "Editing todo(s) with $EDITOR"
+  putStrLn "Editing todo.txt with $EDITOR"
   putStrLn "Mr. Sulu, you have the conn."
   _ <- runCommand $ "$EDITOR " ++ todoTxtFilePath
   return ()
