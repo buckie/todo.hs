@@ -11,6 +11,7 @@ module TodoList.Todo
 ) where
 
 import Data.Char (toUpper)
+import Data.Maybe (fromMaybe)
 
 import TodoList.Utils
 
@@ -78,18 +79,26 @@ unprioritise todo@(Todo text)
   where priorityStrLength = 4
 
 prioritise :: Char -> Todo -> Todo
--- FIXME: are we having priorities `elem` ['A'..'E'] or what
 prioritise priorityInput todo@(Todo text)
   | completed todo = complete . prioritise priorityInput $ uncomplete todo
   | prioritised todo = prioritise priorityInput $ unprioritise todo
-  | otherwise = Todo (priorityString ++ text)
-  where priorityString = "(" ++ [toUpper priorityInput] ++ ") "
+  | otherwise = Todo $ fromMaybe "" priorityString ++ text
+  -- FIXME: the validprioritychar check should be in the CLI interface module,
+  -- so we can give a helpful error message...
+  where priorityString = if validPriorityChar priorityInput
+                            then Just $ "(" ++ [toUpper priorityInput] ++ ") "
+                            else Nothing
 
 priorityChar :: Todo -> Maybe Char
 priorityChar todo@(Todo text)
   | completed todo = priorityChar $ uncomplete todo
   | otherwise = case text of
-                  ('(':pri:')':' ':_) -> if toUpper pri `elem` ['A'..'E']
+                  ('(':pri:')':' ':_) -> if validPriorityChar pri
                                            then Just (toUpper pri)
                                            else Nothing
                   _ -> Nothing
+
+validPriorityChar :: Char -> Bool
+-- FIXME: it feels like this priorityChar stuff should really just be in
+-- the serialisation logic..
+validPriorityChar = (`elem` ['A'..'Z']) . toUpper
