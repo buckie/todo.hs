@@ -1,6 +1,5 @@
-import System.Environment (getArgs, getEnv)
+import System.Environment (getArgs)
 import System.Process (runCommand)
-import System.Directory (doesFileExist)
 
 import Control.Monad (when)
 import Data.Char (toUpper)
