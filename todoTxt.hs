@@ -1,5 +1,6 @@
 import System.Environment (getArgs, getEnv)
 import System.Process (runCommand)
+import System.Directory (doesFileExist)
 
 import Control.Monad (when)
 import Data.Char (toUpper)
@@ -8,16 +9,9 @@ import TodoList.List (displayTodoList, displayOnlyTodos)
 import TodoList.Actions
 import TodoList.Marshalling
 import TodoList.File
+import TodoList.FilePaths
 
 import TodoList.Utils
-
--- TODO: pick up a ./todo.txt file in the current dir, otherwise use
--- global
-getTodoTxtFilePath :: IO FilePath
-getTodoTxtFilePath = getEnv "TODO_TXT_PATH"
-
-getArchiveFilePath :: IO FilePath
-getArchiveFilePath = getEnv "TODO_ARCHIVE_PATH"
 
 list :: IO ()
 list = do

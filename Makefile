@@ -11,7 +11,7 @@ llvm_build:
 clean:
 	make __clean_junk
 	rm -f t
-	rm -f archive.txt t.txt
+	rm -f archive.txt todo.txt
 
 install:
 	mv ./t /usr/local/bin
@@ -35,7 +35,7 @@ __clean_junk:
 	rm -f TodoList/*.o TodoList/*.hi
 
 __fake_todo:
-	cp t.txt.sample t.txt
+	cp todo.txt.sample todo.txt
 
 # I'm so sorry about this:
 fetch_deps:
