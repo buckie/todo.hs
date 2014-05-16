@@ -92,10 +92,11 @@ editTodoFile = do
   _ <- runCommand $ "$EDITOR " ++ todoTxtFilePath
   return ()
 
+dispatch :: [String] -> IO ()
 -- FIXME: getOpts or something a bit more solid/less ridiculous than this
 -- TODO: add CLI help!
-dispatch :: [String] -> IO ()
 -- TODO: add filtered ls for contexts and projects
+-- TODO: add -g override flag that forces using global todo.txt file path
 dispatch [] = list
 dispatch ("list":[]) = list
 dispatch ("ls":[]) = list
