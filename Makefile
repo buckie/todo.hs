@@ -17,10 +17,10 @@ install:
 	mv ./t /usr/local/bin
 
 ls_todo:
-	ag TODO
+	ag --ignore Makefile "TODO:"
 
 ls_fix:
-	ag FIXME
+	ag --ignore Makefile "FIXME:"
 
 seed:
 	make __fake_todo
