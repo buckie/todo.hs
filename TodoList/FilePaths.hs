@@ -1,4 +1,6 @@
 module TodoList.FilePaths
+-- FIXME: TodoList is becoming a bit crowded... and FilePaths is more of
+-- a todo.txt (interfaca) concern ...
 ( getTodoTxtFilePath
 , getArchiveFilePath
 ) where
