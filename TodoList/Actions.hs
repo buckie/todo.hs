@@ -2,7 +2,7 @@ module TodoList.Actions
 ( TargetTodoIDs
 , TodoListUpdateAction
 , TodoListUpdateResponse
-, archiveTodos
+, archiveTodoList
 , completeTodos
 , uncompleteTodos
 , prioritiseTodos
@@ -47,13 +47,6 @@ updateTodos targetTodoIDs todoList updateF =
         update (tID, todo)= (tID, updateF todo)
         needsUpdate (tID, _) = tID `elem` targetTodoIDs
 
-archiveTodos :: TodoList -> TodoListUpdateResponse
-archiveTodos todoList =
-  case archivedTodos of
-    [] -> Nothing
-    _ -> Just (archivedTodos, newTodos)
-  where (archivedTodos, newTodos) = partitionTodoList completed todoList
-
 removeTodos :: TodoListUpdateAction
 removeTodos targetTodoIDs todoList =
   if canUpdate targetTodoIDs todoList
@@ -61,6 +54,16 @@ removeTodos targetTodoIDs todoList =
      else Nothing
   where
     (removedTodosWithIDs, newTodosWithIDs) = partition (\(tID, _) -> tID `elem` targetTodoIDs) todoList
+
+archiveTodoList :: TodoList -> TodoListUpdateResponse
+archiveTodoList todoList =
+  case archivedTodos of
+    [] -> Nothing
+    _ -> Just (compactTodoList archivedTodos, newTodos)
+  where (archivedTodos, newTodos) = partitionTodoList completed todoList
+
+compactTodoList :: TodoList -> TodoList
+compactTodoList = zipWith (\tID (_, todo) -> (tID, todo)) [(1::Int)..]
 
 canUpdate :: TargetTodoIDs -> TodoList -> Bool
 canUpdate targetTodoIDs todoList =

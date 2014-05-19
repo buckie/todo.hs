@@ -29,15 +29,22 @@ readTodo todoLine =
 
 serialiseTodoList :: TodoList -> String
 serialiseTodoList todoList =
-  unlines $ map todoOrBlankLine lineIDs
+  unlines . removeMultipleBlankLines $ map todoOrBlankLine lineIDs
   where
-    serialisedTodoListWithIDs = map (Control.Arrow.second serialiseTodo) todoList
-    todoMap = Map.fromList serialisedTodoListWithIDs
+    serialisedTodosWithIDs = map (Control.Arrow.second serialiseTodo) todoList
+
+    serialisedTodos :: Map.Map TodoID String
+    serialisedTodos = Map.fromList serialisedTodosWithIDs
+
+    todoOrBlankLine iD = fromMaybe "" (Map.lookup iD serialisedTodos)
 
     todoIDs = map fst todoList
     lineIDs = [1..(maximum todoIDs)]
 
-    todoOrBlankLine iD = fromMaybe "" (Map.lookup iD todoMap)
+    removeMultipleBlankLines :: [String] -> [String]
+    removeMultipleBlankLines [] = []
+    removeMultipleBlankLines ("":"":strs) = "" : removeMultipleBlankLines strs
+    removeMultipleBlankLines (str:strs) = str : removeMultipleBlankLines strs
 
 serialiseTodo :: Todo -> String
 serialiseTodo (Todo text) = text

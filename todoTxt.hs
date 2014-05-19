@@ -59,7 +59,7 @@ archive = do
   archiveFilePath <- getArchiveFilePath
   todoTxtFilePath <- getTodoTxtFilePath
   oldTodos <- readTodoFile todoTxtFilePath
-  let archiveResult = archiveTodos oldTodos
+  let archiveResult = archiveTodoList oldTodos
   case archiveResult of
     Just (archivedTodoList, updatedTodoList) -> do
       putStrLn $ "Archiving todos (" ++ todoTxtFilePath ++ " -> " ++ archiveFilePath ++ " )...\n"
