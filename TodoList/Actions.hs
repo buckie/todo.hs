@@ -2,12 +2,12 @@ module TodoList.Actions
 ( TargetTodoIDs
 , TodoListUpdateAction
 , TodoListUpdateResponse
-, archiveTodoList
-, completeTodos
-, uncompleteTodos
 , prioritiseTodos
 , unprioritiseTodos
+, completeTodos
+, uncompleteTodos
 , removeTodos
+, archiveTodoList
 ) where
 
 import Data.List (partition)
@@ -32,20 +32,6 @@ completeTodos targetTodoIDs todos = updateTodos targetTodoIDs todos complete
 uncompleteTodos :: TodoListUpdateAction
 uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
 
-updateTodos :: TargetTodoIDs -> TodoList -> TodoUpdateAction -> TodoListUpdateResponse
-updateTodos targetTodoIDs todoList updateF =
-  if canUpdate targetTodoIDs todoList
-    then Just (onlyUpdated, everything)
-    else Nothing
-  where
-    (onlyUpdated, everything) = foldl updateIfNeeded ([],[]) todoList
-    updateIfNeeded (onlyUpdated', everything') listItem
-      | needsUpdate listItem = (onlyUpdated' ++ [update listItem], everything' ++ [update listItem])
-      | otherwise = (onlyUpdated', everything' ++ [listItem])
-      where
-        update (tID, todo)= (tID, updateF todo)
-        needsUpdate (tID, _) = tID `elem` targetTodoIDs
-
 removeTodos :: TodoListUpdateAction
 removeTodos targetTodoIDs todoList =
   if canUpdate targetTodoIDs todoList
@@ -60,6 +46,23 @@ archiveTodoList todoList =
     [] -> Nothing
     _ -> Just (compactTodoList archivedTodos, newTodos)
   where (archivedTodos, newTodos) = partitionTodoList completed todoList
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+updateTodos :: TargetTodoIDs -> TodoList -> TodoUpdateAction -> TodoListUpdateResponse
+updateTodos targetTodoIDs todoList updateF =
+  if canUpdate targetTodoIDs todoList
+    then Just (onlyUpdated, everything)
+    else Nothing
+  where
+    (onlyUpdated, everything) = foldl updateIfNeeded ([],[]) todoList
+    updateIfNeeded (onlyUpdated', everything') listItem
+      | needsUpdate listItem = (onlyUpdated' ++ [update listItem], everything' ++ [update listItem])
+      | otherwise = (onlyUpdated', everything' ++ [listItem])
+      where
+        update (tID, todo)= (tID, updateF todo)
+        needsUpdate (tID, _) = tID `elem` targetTodoIDs
 
 compactTodoList :: TodoList -> TodoList
 compactTodoList = zipWith (\tID (_, todo) -> (tID, todo)) [(1::Int)..]
