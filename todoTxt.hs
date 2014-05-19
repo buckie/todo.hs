@@ -50,6 +50,16 @@ unprioritise targetTodoIDs = do
   putStrLn $ "Un-Prioritizing todo(s): " ++ show targetTodoIDs
   updateTodoFileWith unprioritiseTodos targetTodoIDs
 
+prepend :: String -> TargetTodoIDs -> IO ()
+prepend textToPrepend targetTodoIDs = do
+  putStrLn $ "Prepending \"" ++ textToPrepend ++ "\" to todo(s): " ++ show targetTodoIDs ++ "...\n"
+  updateTodoFileWith (prependToTodos textToPrepend) targetTodoIDs
+
+append :: String -> TargetTodoIDs -> IO ()
+append textToAppend targetTodoIDs = do
+  putStrLn $ "Appending \"" ++ textToAppend ++ "\" to todo(s): " ++ show targetTodoIDs ++ "...\n"
+  updateTodoFileWith (appendToTodos textToAppend) targetTodoIDs
+
 remove :: TargetTodoIDs -> IO ()
 remove targetTodoIDs = do
   putStrLn $ "Removing todo(s): " ++ show targetTodoIDs
@@ -72,20 +82,6 @@ archive = do
       putStrLn $ displayOnlyTodos archivedTodoList
     Nothing -> putStrLn $ colouredStr Red "Nothing to archive!"
 
-updateTodoFileWith :: TodoListUpdateAction -> TargetTodoIDs -> IO ()
-updateTodoFileWith updateF targetTodoIDs = do
-  todoTxtFilePath <- getTodoTxtFilePath
-  oldTodos <- readTodoFile todoTxtFilePath
-  let updateResult = updateF targetTodoIDs oldTodos
-  case updateResult of
-    Just (updatedTodoList, newTodoList) -> do
-      updateTodoFile todoTxtFilePath newTodoList
-      putStrLn $ displayTodoList newTodoList
-      putStrLn $ "Todo(s) affected:\n" ++ displayOnlyTodos updatedTodoList
-    Nothing -> do
-      putStrLn $ displayTodoList oldTodos
-      putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoIDs
-
 editTodoFile :: IO ()
 editTodoFile = do
   todoTxtFilePath <- getTodoTxtFilePath
@@ -106,20 +102,26 @@ dispatch ("ls":[]) = list
 dispatch ("add":todo) = add $ unwords todo
 dispatch ("a":todo) = add $ unwords todo
 
-dispatch ("complete":tIds) = complete $ map read tIds
-dispatch ("do":tIds) = complete $ map read tIds
+dispatch ("complete":tIDs) = complete $ map read tIDs
+dispatch ("do":tIDs) = complete $ map read tIDs
 
-dispatch ("uncomplete":tIds) = uncomplete $ map read tIds
-dispatch ("undo":tIds) = uncomplete $ map read tIds
+dispatch ("uncomplete":tIDs) = uncomplete $ map read tIDs
+dispatch ("undo":tIDs) = uncomplete $ map read tIDs
 
-dispatch ("prioritise":pri:tIds) = prioritise (toUpper $ head pri) $ map read tIds
-dispatch ("pri":pri:tIds) = prioritise (toUpper $ head pri) $ map read tIds
+dispatch ("prioritise":pri:tIDs) = prioritise (toUpper $ head pri) $ map read tIDs
+dispatch ("pri":pri:tIDs) = prioritise (toUpper $ head pri) $ map read tIDs
 
-dispatch ("unprioritise":tIds) = unprioritise $ map read tIds
-dispatch ("unpri":tIds) = unprioritise $ map read tIds
+dispatch ("unprioritise":tIDs) = unprioritise $ map read tIDs
+dispatch ("unpri":tIDs) = unprioritise $ map read tIDs
 
-dispatch ("remove":tIds) = remove $ map (\tId -> read tId :: Int) tIds
-dispatch ("rm":tIds) = remove $ map read tIds
+dispatch ("prepend":textToPrepend:tIDs) = prepend textToPrepend $ map read tIDs
+dispatch ("prep":textToPrepend:tIDs) = prepend textToPrepend $ map read tIDs
+
+dispatch ("append":textToAppend:tIDs) = append textToAppend $ map read tIDs
+dispatch ("app":textToAppend:tIDs) = append textToAppend $ map read tIDs
+
+dispatch ("remove":tIDs) = remove $ map (\tID -> read tID :: Int) tIDs
+dispatch ("rm":tIDs) = remove $ map read tIDs
 
 dispatch ("archive":[]) = archive
 dispatch ("ar":[]) = archive
@@ -134,3 +136,21 @@ main :: IO ()
 main = do
   args <- getArgs
   dispatch args
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+updateTodoFileWith :: TodoListUpdateAction -> TargetTodoIDs -> IO ()
+updateTodoFileWith updateF targetTodoIDs = do
+  todoTxtFilePath <- getTodoTxtFilePath
+  oldTodos <- readTodoFile todoTxtFilePath
+  let updateResult = updateF targetTodoIDs oldTodos
+  case updateResult of
+    Just (updatedTodoList, newTodoList) -> do
+      updateTodoFile todoTxtFilePath newTodoList
+      putStrLn $ displayTodoList newTodoList
+      putStrLn $ "Todo(s) affected:\n" ++ displayOnlyTodos updatedTodoList
+    Nothing -> do
+      putStrLn $ displayTodoList oldTodos
+      putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoIDs
+
