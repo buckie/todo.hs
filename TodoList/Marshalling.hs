@@ -3,7 +3,6 @@ module TodoList.Marshalling
 , serialiseTodoList
 ) where
 
-import Data.Char (toUpper)
 import Data.Maybe (fromMaybe)
 import Control.Arrow (second)
 import qualified Data.Text as Text
@@ -20,16 +19,11 @@ readTodoList todoTxt = [(tID, readTodo todoLine) | (tID, todoLine) <- linesWithI
                        where linesWithIDs = zip [(1::Int)..] (lines todoTxt)
 
 readTodo :: String -> Todo
-readTodo todoLine =
-  case priorityChar' of
-    Just pri -> prioritise (toUpper pri) $ unprioritise todo
-    Nothing -> todo
-  where todo = Todo todoLine
-        priorityChar' = priorityChar todo
+readTodo = normalise . Todo
 
 serialiseTodoList :: TodoList -> String
 serialiseTodoList todoList =
-  unlines . removeMultipleBlankLines $ map todoOrBlankLine lineIDs
+  unlines . removeConsecutiveBlankLines $ map todoOrBlankLine lineIDs
   where
     serialisedTodosWithIDs = map (Control.Arrow.second serialiseTodo) todoList
 
@@ -41,10 +35,10 @@ serialiseTodoList todoList =
     todoIDs = map fst todoList
     lineIDs = [1..(maximum todoIDs)]
 
-    removeMultipleBlankLines :: [String] -> [String]
-    removeMultipleBlankLines [] = []
-    removeMultipleBlankLines ("":"":strs) = "" : removeMultipleBlankLines strs
-    removeMultipleBlankLines (str:strs) = str : removeMultipleBlankLines strs
+    removeConsecutiveBlankLines :: [String] -> [String]
+    removeConsecutiveBlankLines [] = []
+    removeConsecutiveBlankLines ("":"":strs) = "" : removeConsecutiveBlankLines strs
+    removeConsecutiveBlankLines (str:strs) = str : removeConsecutiveBlankLines strs
 
 serialiseTodo :: Todo -> String
 serialiseTodo (Todo text) = text
