@@ -8,6 +8,8 @@ module TodoList.Todo
 , prioritised
 , prioritise
 , unprioritise
+, append
+, prepend
 , normalise
 ) where
 
@@ -92,6 +94,12 @@ prioritise priorityInput todo@(Todo text)
   where priorityString = if validPriorityChar priorityInput
                             then Just $ "(" ++ [toUpper priorityInput] ++ ") "
                             else Nothing
+
+append :: String -> TodoUpdateAction
+append textToAppend (Todo tText) = Todo $ tText ++ " " ++ textToAppend
+
+prepend :: String -> TodoUpdateAction
+prepend textToPrepend (Todo tText) = Todo $ textToPrepend ++ " " ++ tText
 
 normalise :: TodoUpdateAction
 normalise todo
