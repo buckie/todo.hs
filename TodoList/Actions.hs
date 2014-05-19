@@ -18,7 +18,6 @@ import TodoList.List
 type TargetTodoIDs = [TodoID]
 type TodoListUpdateAction = [TodoID] -> TodoList -> TodoListUpdateResponse
 type TodoListUpdateResponse = Maybe (TodoList, TodoList)
-type TodoUpdateAction = Todo -> Todo
 
 prioritiseTodos :: Char -> TodoListUpdateAction
 prioritiseTodos priorityInput targetTodoIDs todos =

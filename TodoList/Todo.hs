@@ -1,5 +1,6 @@
 module TodoList.Todo
 ( Todo(..)
+, TodoUpdateAction
 , completed
 , complete
 , uncomplete
