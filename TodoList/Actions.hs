@@ -6,6 +6,8 @@ module TodoList.Actions
 , unprioritiseTodos
 , completeTodos
 , uncompleteTodos
+, appendToTodos
+, prependToTodos
 , removeTodos
 , archiveTodoList
 ) where
@@ -19,6 +21,12 @@ type TargetTodoIDs = [TodoID]
 type TodoListUpdateAction = [TodoID] -> TodoList -> TodoListUpdateResponse
 type TodoListUpdateResponse = Maybe (TodoList, TodoList)
 
+completeTodos :: TodoListUpdateAction
+completeTodos targetTodoIDs todos = updateTodos targetTodoIDs todos complete
+
+uncompleteTodos :: TodoListUpdateAction
+uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
+
 prioritiseTodos :: Char -> TodoListUpdateAction
 prioritiseTodos priorityInput targetTodoIDs todos =
   updateTodos targetTodoIDs todos (prioritise priorityInput)
@@ -26,11 +34,11 @@ prioritiseTodos priorityInput targetTodoIDs todos =
 unprioritiseTodos :: TodoListUpdateAction
 unprioritiseTodos targetTodoIDs todos = updateTodos targetTodoIDs todos unprioritise
 
-completeTodos :: TodoListUpdateAction
-completeTodos targetTodoIDs todos = updateTodos targetTodoIDs todos complete
+appendToTodos :: String -> TodoListUpdateAction
+appendToTodos textToAppend targetTodoIDs todos = updateTodos targetTodoIDs todos (append textToAppend)
 
-uncompleteTodos :: TodoListUpdateAction
-uncompleteTodos targetTodoIDs todos = updateTodos targetTodoIDs todos uncomplete
+prependToTodos :: String -> TodoListUpdateAction
+prependToTodos textToPrepend targetTodoIDs todos = updateTodos targetTodoIDs todos (prepend textToPrepend)
 
 removeTodos :: TodoListUpdateAction
 removeTodos targetTodoIDs todoList =
