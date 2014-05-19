@@ -4,10 +4,10 @@ module TodoList.Todo
 , complete
 , uncomplete
 , priority
-, priorityChar
 , prioritised
 , prioritise
 , unprioritise
+, normalise
 ) where
 
 import Data.Char (toUpper)
@@ -16,6 +16,11 @@ import Data.Maybe (fromMaybe)
 import TodoList.Utils
 
 data Todo = Todo String deriving (Eq)
+
+-- FIXME: these should really be Either ErrorMessage UpdatedTodo
+-- so that the messages can be forwarded to the interface
+-- and so that we can avoid useless saves to file
+type TodoUpdateAction = Todo -> Todo
 
 instance Show Todo where
   show todo@(Todo text)
@@ -39,12 +44,12 @@ completed (Todo text) =
     ('x':' ':_) -> True
     _ -> False
 
-complete :: Todo -> Todo
+complete :: TodoUpdateAction
 complete todo@(Todo text)
   | completed todo = todo
   | otherwise = Todo ("x " ++ text)
 
-uncomplete :: Todo -> Todo
+uncomplete :: TodoUpdateAction
 uncomplete todo@(Todo text)
   | completed todo = Todo (drop completionStrLength text)
   | otherwise = todo
@@ -71,23 +76,28 @@ prioritised todo
                   Nothing -> False
                   Just _ -> True
 
-unprioritise ::Todo -> Todo
+unprioritise :: TodoUpdateAction
 unprioritise todo@(Todo text)
   | completed todo = complete . unprioritise $ uncomplete todo
   | prioritised todo = Todo (drop priorityStrLength text)
   | otherwise = todo
   where priorityStrLength = 4
 
-prioritise :: Char -> Todo -> Todo
+prioritise :: Char -> TodoUpdateAction
 prioritise priorityInput todo@(Todo text)
   | completed todo = complete . prioritise priorityInput $ uncomplete todo
   | prioritised todo = prioritise priorityInput $ unprioritise todo
   | otherwise = Todo $ fromMaybe "" priorityString ++ text
-  -- FIXME: the validprioritychar check should be in the CLI interface module,
-  -- so we can give a helpful error message...
   where priorityString = if validPriorityChar priorityInput
                             then Just $ "(" ++ [toUpper priorityInput] ++ ") "
                             else Nothing
+
+normalise :: TodoUpdateAction
+normalise todo
+  | completed todo = complete . normalise $ uncomplete todo
+  | prioritised todo = prioritise priorityChar' $ unprioritise todo
+  | otherwise = todo
+  where priorityChar' = fromMaybe 'A' $ priorityChar todo
 
 priorityChar :: Todo -> Maybe Char
 priorityChar todo@(Todo text)
@@ -99,6 +109,4 @@ priorityChar todo@(Todo text)
                   _ -> Nothing
 
 validPriorityChar :: Char -> Bool
--- FIXME: it feels like this priorityChar stuff should really just be in
--- the serialisation logic..
 validPriorityChar = (`elem` ['A'..'Z']) . toUpper
