@@ -2,13 +2,15 @@ import System.Environment (getArgs)
 import System.Process (runCommand)
 
 import Control.Monad (when)
+
 import Data.Char (toUpper)
 
 import TodoList.List (displayTodoList, displayOnlyTodos)
 import TodoList.Actions
-import TodoList.Marshalling
+
 import TodoList.File
 import TodoList.FilePaths
+import TodoList.Marshalling
 
 import TodoList.Utils
 
@@ -110,8 +112,8 @@ dispatch ("do":tIds) = complete $ map read tIds
 dispatch ("uncomplete":tIds) = uncomplete $ map read tIds
 dispatch ("undo":tIds) = uncomplete $ map read tIds
 
-dispatch ("prioritise":pri:tIds) = prioritise (head pri) $ map read tIds
-dispatch ("pri":pri:tIds) = prioritise (head pri) $ map read tIds
+dispatch ("prioritise":pri:tIds) = prioritise (toUpper $ head pri) $ map read tIds
+dispatch ("pri":pri:tIds) = prioritise (toUpper $ head pri) $ map read tIds
 
 dispatch ("unprioritise":tIds) = unprioritise $ map read tIds
 dispatch ("unpri":tIds) = unprioritise $ map read tIds
