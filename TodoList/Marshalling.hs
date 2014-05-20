@@ -22,6 +22,7 @@ readTodo :: String -> Todo
 readTodo = normalise . Todo
 
 serialiseTodoList :: TodoList -> String
+serialiseTodoList [] = ""
 serialiseTodoList todoList =
   unlines . removeConsecutiveBlankLines $ map todoOrBlankLine lineIDs
   where
