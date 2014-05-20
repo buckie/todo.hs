@@ -124,6 +124,12 @@ dispatch ("remove":tIDs) = remove $ map (\tID -> read tID :: Int) tIDs
 dispatch ("rm":tIDs) = remove $ map read tIDs
 
 dispatch ("archive":[]) = archive
+dispatch ("arr":[]) = do
+  putStrLn $ colouredStr Yellow "☠ ☠ [Pirate Mode Enabled] ☠ ☠"
+  putStrLn $ oldSalt ++ "Aye aye sir."
+  putStrLn $ oldSalt ++ "You heard the Captain! Batten down the hatches, ye miserable scallywags"
+  archive
+  where oldSalt = colouredStr Yellow "old-salt: "
 dispatch ("ar":[]) = archive
 
 dispatch ("edit":[]) = editTodoFile
