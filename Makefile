@@ -39,4 +39,5 @@ __fake_todo:
 
 # I'm so sorry about this:
 fetch_deps:
+	cabal update
 	cabal install ansi-terminal
