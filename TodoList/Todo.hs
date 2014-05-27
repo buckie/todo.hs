@@ -27,7 +27,7 @@ type TodoUpdateAction = Todo -> Todo
 
 instance Show Todo where
   show todo@(Todo text)
-    | completed todo = colouredStr White text
+    | completed todo = colouredStr Black text
     | otherwise = case priority todo of
                     Priority 'A' -> colouredStr Yellow text
                     Priority 'B' -> colouredStr Green text
