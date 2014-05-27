@@ -49,6 +49,7 @@ removeTodos targetTodoIDs todoList =
     (removedTodosWithIDs, newTodosWithIDs) = partition (\(tID, _) -> tID `elem` targetTodoIDs) todoList
 
 archiveTodoList :: TodoList -> TodoListUpdateResponse
+-- TODO: add completion date
 archiveTodoList todoList =
   case archivedTodos of
     [] -> Nothing
