@@ -1,7 +1,7 @@
 import System.Environment (getArgs)
 import System.Process (runCommand)
 
-import Control.Monad (liftM, when)
+import Control.Monad (when)
 
 import Data.Char (toUpper)
 
@@ -15,8 +15,9 @@ import TodoList.Marshalling
 import TodoList.Utils
 
 list :: IO ()
-list =
-  liftM displayTodoList (getTodoTxtFilePath >>= readTodoFile) >>= putStrLn
+list = do
+  todos <- readTodoFile =<< getTodoTxtFilePath
+  putStrLn $ displayTodoList todos
 
 add :: String -> IO ()
 add todoText = do
