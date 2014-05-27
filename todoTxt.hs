@@ -20,10 +20,10 @@ list =
 
 add :: String -> IO ()
 add todoText = do
-  todoTxtFilePath <- getTodoTxtFilePath
-  putStrLn "Adding todo:"
+  putStrLn "Adding todo(s):"
   let newTodos = readTodoList todoText
   putStrLn $ displayOnlyTodos newTodos
+  todoTxtFilePath <- getTodoTxtFilePath
   appendTodoFile todoTxtFilePath newTodos
 
 complete :: TargetTodoIDs -> IO ()
