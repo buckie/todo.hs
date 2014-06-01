@@ -38,6 +38,7 @@ __fake_todo:
 	cp todo.txt.sample todo.txt
 
 # I'm so sorry about this:
+# FIXME: move the whole thing to a cabal build
 fetch_deps:
 	cabal update
 	cabal install ansi-terminal

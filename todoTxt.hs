@@ -67,11 +67,15 @@ remove targetTodoIDs = do
 
 archive :: IO ()
 archive = do
+  -- FIXME: this can probably be a combo of append + remove
   archiveFilePath <- getArchiveFilePath
   todoTxtFilePath <- getTodoTxtFilePath
+
   oldTodos <- readTodoFile todoTxtFilePath
   let archiveResult = archiveTodoList oldTodos
+
   case archiveResult of
+
     Just (archivedTodoList, updatedTodoList) -> do
       putStrLn $ "Archiving todos (" ++ todoTxtFilePath ++ " -> " ++ archiveFilePath ++ " )...\n"
       appendTodoFile archiveFilePath archivedTodoList
@@ -79,6 +83,7 @@ archive = do
       putStrLn $ displayTodoList updatedTodoList
       putStrLn $ show (length archivedTodoList) ++ " todo(s) archived to " ++ archiveFilePath ++ ":\n"
       putStrLn $ displayOnlyTodos archivedTodoList
+
     Nothing -> putStrLn $ colouredStr Red "Nothing to archive!"
 
 editTodoFile :: IO ()
