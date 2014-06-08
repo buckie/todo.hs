@@ -81,9 +81,3 @@ canUpdate targetTodoIDs todoList =
   all (`elem` availableTodoIDs) targetTodoIDs
   where availableTodoIDs = map fst todoList
 
-partitionTodoList :: (Todo -> Bool) -> TodoList -> (TodoList, TodoList)
-partitionTodoList p =
-  foldl (\(left, right) listItem@(_, todo) ->
-    if p todo
-       then (left ++ [listItem], right)
-       else (left, right ++ [listItem])) ([],[])

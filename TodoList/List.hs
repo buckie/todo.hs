@@ -1,25 +1,38 @@
 module TodoList.List
 ( TodoID
 , TodoList
-, sortTodoList
 , displayTodoList
 , displayOnlyTodos
 ) where
 
 import qualified Text.Printf as Printf
-import Data.List (sortBy)
+import Data.List (sortBy, partition)
 
 import TodoList.Todo
 
-type TodoID = Int
-type TodoList = [(TodoID, Todo)]
+type ID = Int
+data ListItem i = ListItem ID i deriving (Eq)
 
-sortTodoList :: TodoList -> TodoList
-sortTodoList = sortBy (\(_, t1) (_, t2) -> compare t1 t2)
+instance Functor ListItem where
+  fmap f (ListItem idx item) = ListItem idx (f item)
+
+instance (Show i) => Show (ListItem i) where
+  show (ListItem tID todo) = showTodoID tID ++ show todo
+                             where showTodoID = Printf.printf "%3d "
+
+instance (Ord i) => Ord (ListItem i) where
+  compare (ListItem _ i1) (ListItem _ i2) = compare i1 i2
+
+type TodoList = [ListItem Todo]
+type TodoID = ID
 
 displayTodoList :: TodoList -> String
-displayTodoList todoList = unlines [showTodoID tID ++ show todo | (tID, todo) <- reverse $ sortTodoList todoList]
-                           where showTodoID = Printf.printf "%3d "
+displayTodoList = unlines . map show . sortBy (flip compare)
 
 displayOnlyTodos :: TodoList -> String
-displayOnlyTodos todoList = unlines [ show todo | (_, todo) <- reverse $ sortTodoList todoList]
+displayOnlyTodos = unlines . map showTodo . sortBy (flip compare)
+                   where showTodo (ListItem _ t) = show t
+
+partitionTodoList :: (Todo -> Bool) -> TodoList -> (TodoList, TodoList)
+partitionTodoList p todoList = partition 
+
