@@ -1,11 +1,11 @@
 build:
 	make clean
-	ghc todoTxt.hs
+	ghc t.hs
 	make __post_build
 
 llvm_build:
 	make clean
-	ghc -fllvm todoTxt.hs
+	ghc -fllvm t.hs
 	make __post_build
 
 clean:
@@ -26,7 +26,6 @@ seed:
 	make __fake_todo
 
 __post_build:
-	mv todoTxt t
 	make __fake_todo
 	make __clean_junk
 

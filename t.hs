@@ -9,10 +9,10 @@ import TodoList.List (displayTodoList, displayOnlyTodos)
 import TodoList.Actions
 
 import TodoList.File
-import TodoList.FilePaths
 import TodoList.Marshalling
-
 import TodoList.Utils
+
+import FilePaths
 
 list :: IO ()
 list = do
@@ -68,7 +68,7 @@ remove targetTodoIDs = do
 archive :: IO ()
 archive = do
   -- FIXME: this can probably be a combo of append + remove
-  archiveFilePath <- getArchiveFilePath
+  archiveFilePath <- getDoneTxtFilePath
   todoTxtFilePath <- getTodoTxtFilePath
 
   oldTodos <- readTodoFile todoTxtFilePath
