@@ -1,20 +1,15 @@
 build:
-	make clean
-	ghc t.hs
-	make __post_build
-
-llvm_build:
-	make clean
-	ghc -fllvm t.hs
-	make __post_build
+	cabal clean
+	cabal install -j
+	cabal build
+	make __fake_todo
 
 clean:
-	make __clean_junk
-	rm -f t
+	cabal clean
 	rm -f archive.txt todo.txt
 
 install:
-	mv ./t /usr/local/bin
+	mv ./dist/build/todo-hs/todo-hs /usr/local/bin/t
 
 ls_todo:
 	ag --ignore Makefile "TODO:"
@@ -25,19 +20,5 @@ ls_fix:
 seed:
 	make __fake_todo
 
-__post_build:
-	make __fake_todo
-	make __clean_junk
-
-__clean_junk:
-	rm -f *.o *.hi
-	rm -f TodoList/*.o TodoList/*.hi
-
 __fake_todo:
 	cp todo.txt.sample todo.txt
-
-# I'm so sorry about this:
-# FIXME: move the whole thing to a cabal build
-fetch_deps:
-	cabal update
-	cabal install ansi-terminal
