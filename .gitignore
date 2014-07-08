@@ -4,4 +4,6 @@ t
 *.hi
 *.o
 TodoList/TodoList
+
 .cabal-sandbox/
+dist/
