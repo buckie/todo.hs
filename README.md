@@ -6,17 +6,21 @@ Some improvements are:
 
 * doesn’t mess up todo.txt, keeps todos where they are
 * maintains todo ids across runs
-* Ludicrous speed
+* ludicrous speed
+* most commands take multiple `todiID`s (e.g., `t pri A 1 2 12 32 42` will prioritise all the todos given)
+* uses the `todo.txt` in the current directory if there is one (useful for project-specific todos)
 
 Mainly to teach myself haskell.
 
 # Installation
 
-```
-git checkout ...
-cd todo.hs
-make
-./t
+```bash
+$ git checkout ...
+$ cd todo.hs
+$ make init
+$ make
+$ make install
+$ t
 ```
 
 Todo.hs expects the two environment variables to be set. Put the following in your `.bashrc` or `.zshrc`:
@@ -37,6 +41,10 @@ $ t pri
 $ t complete
 $ t do
 
+$ t archive
+$ t ar
+
 ...
+# for more, read the dispatch function in Main.hs
 ```
 
