@@ -7,3 +7,5 @@ TodoList/TodoList
 
 .cabal-sandbox/
 dist/
+
+cabal.sandbox.config
