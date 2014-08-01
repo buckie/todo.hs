@@ -1,10 +1,8 @@
 build:
 	cabal clean
+	cabal configure
 	cabal build
 	make __fake_todo
-
-configure:
-	cabal configure
 
 clean:
 	cabal clean
@@ -20,7 +18,7 @@ deps:
 	cabal install --only-dependencies
 
 install:
-	mv ./dist/build/todo-hs/todo-hs /usr/local/bin/t
+	cabal install
 
 seed:
 	make __fake_todo
