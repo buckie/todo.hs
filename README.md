@@ -15,7 +15,7 @@ Mainly to teach myself haskell.
 # Installation
 
 ```bash
-$ git checkout ...
+$ git checkout https://github.com/vise890/todo.hs
 $ cd todo.hs
 $ make init
 $ make
@@ -23,12 +23,17 @@ $ make install
 $ t
 ```
 
+## Setup
 Todo.hs expects the two environment variables to be set. Put the following in your `.bashrc` or `.zshrc`:
 
 ```
 export TODO_TXT_PATH="/path/to/todo.txt"
 export DONE_TXT_PATH="/path/to/archive.txt"
 ```
+
+## Pre-requisites
+- ghc
+- cabal > 1.20
 
 # Usage
 ```
