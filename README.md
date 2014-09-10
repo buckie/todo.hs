@@ -33,14 +33,14 @@ $ ./dist/build/t/t
 
 # Usage
 ```
-$ t add
-$ t a
+$ t add "(A) become ultra-zen"
+$ t a "(B) go to easter island"
 
-$ t prioritise
-$ t pri
+$ t prioritise A 1 2 3
+$ t pri C 2 4
 
-$ t complete
-$ t do
+$ t complete 1 2 3 5
+$ t do 11 1 10
 
 $ t archive
 $ t ar
