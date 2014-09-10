@@ -6,27 +6,25 @@ module FilePaths
 import System.Directory
 import System.Environment (getEnv)
 
--- FIXME: should be localTodoTxtPath
-localTodoFilePath :: String
-localTodoFilePath = "./todo.txt"
+localTodoTxtPath :: String
+localTodoTxtPath = "./todo.txt"
 
--- FIXME: should be localDoneTxtPath
-localArchiveFilePath :: String
-localArchiveFilePath = "./done.txt"
+localDoneTxtPath :: String
+localDoneTxtPath = "./done.txt"
 
 -- FIXME: use a dotfile for these
 -- TODO: create a dotfile on first run
 getTodoTxtFilePath :: IO FilePath
 getTodoTxtFilePath = do
-  localTodoFile <- doesFileExist localTodoFilePath
+  localTodoFile <- doesFileExist localTodoTxtPath
   if localTodoFile
-    then return localTodoFilePath
+    then return localTodoTxtPath
     else getEnv "TODO_TXT_PATH"
 
 getDoneTxtFilePath :: IO FilePath
 getDoneTxtFilePath = do
-  localTodoFile <- doesFileExist localTodoFilePath
+  localTodoFile <- doesFileExist localTodoTxtPath
   if localTodoFile
-     then return localArchiveFilePath
+     then return localDoneTxtPath
      else getEnv "DONE_TXT_PATH"
 
