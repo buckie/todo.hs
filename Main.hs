@@ -67,7 +67,7 @@ remove targetTodoIDs = do
 
 archive :: IO ()
 archive = do
-  -- FIXME: this can probably be a combo of append + remove
+  -- FIXME: archive can probably be a combo of append + remove
   archiveFilePath <- getDoneTxtFilePath
   todoTxtFilePath <- getTodoTxtFilePath
 
@@ -86,6 +86,7 @@ archive = do
 
     Nothing -> putStrLn $ colouredStr Red "Nothing to archive!"
 
+-- FIXME: editTodoFile doesn't work for some reason.
 editTodoFile :: IO ()
 editTodoFile = do
   todoTxtFilePath <- getTodoTxtFilePath
@@ -95,7 +96,7 @@ editTodoFile = do
   return ()
 
 dispatch :: [String] -> IO ()
--- FIXME: getOpts or something a bit more solid/less ridiculous than this
+-- FIXME: getOpts or something a bit more solid/less ridiculous than dispatch fn
 -- TODO: add CLI help!
 -- TODO: add -g override flag that forces using global todo.txt file path
 dispatch [] = list

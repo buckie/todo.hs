@@ -12,7 +12,7 @@ localTodoTxtPath = "./todo.txt"
 localDoneTxtPath :: String
 localDoneTxtPath = "./done.txt"
 
--- FIXME: use a dotfile for these
+-- FIXME: use a dotfile for the global Todo file paths
 -- TODO: create a dotfile on first run
 getTodoTxtFilePath :: IO FilePath
 getTodoTxtFilePath = do

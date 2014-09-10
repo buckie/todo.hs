@@ -20,7 +20,7 @@ import TodoList.Utils
 
 data Todo = Todo String deriving (Eq)
 
--- FIXME: these should really be Either ErrorMessage UpdatedTodo
+-- FIXME: TodoUpdateActions should really be `Either ErrorMessage UpdatedTodo`
 -- so that the messages can be forwarded to the interface
 -- and so that we can avoid useless saves to file
 type TodoUpdateAction = Todo -> Todo
