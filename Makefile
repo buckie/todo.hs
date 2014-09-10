@@ -23,6 +23,9 @@ install:
 seed:
 	make __fake_todo
 
+run:
+	./dist/build/t/t
+
 ls_todo:
 	ag --ignore Makefile "TODO:"
 
