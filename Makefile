@@ -18,7 +18,8 @@ deps:
 	cabal install --only-dependencies
 
 install:
-	cabal install
+	# cabal install
+	cp ./dist/build/t/t /usr/local/bin/
 
 seed:
 	make __fake_todo
