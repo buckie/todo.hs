@@ -12,11 +12,11 @@ import Data.List (sortBy)
 import TodoList.Todo
 
 type TodoID = Int
--- TODO: refactor: newdata TodoItem = TodoItem (TodoID, Todo)
--- TODO: instance Functor TodoItem where .... HOW?
--- TODO: instance Eq TodoItem where..
--- TODO: instance Ord TodoItem where..
--- TODO: instance Show TodoItem?
+-- TODO: refactor: newtype "ListItem": ListItem (TodoID, Todo) HOW?
+-- TODO: instance Functor ListItem where..
+-- TODO: instance Eq ListItem where..
+-- TODO: instance Ord ListItem where..
+-- TODO: instance Show ListItem?
 type TodoList = [(TodoID, Todo)]
 
 sortTodoList :: TodoList -> TodoList
