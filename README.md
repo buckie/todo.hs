@@ -24,11 +24,18 @@ export DONE_TXT_PATH="/path/to/archive.txt"
 
 ```bash
 $ git checkout https://github.com/vise890/todo.hs
-$ cd todo.hs
-$ make init
-$ make
-$ make install
-$ ./dist/build/t/t
+
+$ # optional (if you just wanna test it out):
+$ cabal sandbox init
+
+$ cabal install
+```
+
+# Just Running it
+```bash
+$ cabal repl
+
+$ cabal run
 ```
 
 # Usage
