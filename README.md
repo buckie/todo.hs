@@ -13,7 +13,7 @@ Some improvements are:
 * uses the `todo.txt` in the current directory if there is one (useful for
   project-specific todos)
 
-Mainly to teach myself haskell.
+Mainly to teach myself Haskell.
 
 
 # Setup
@@ -23,7 +23,7 @@ your `.bashrc` or `.zshrc`:
 
 ```
 export TODO_TXT_PATH="/path/to/todo.txt"
-export DONE_TXT_PATH="/path/to/archive.txt"
+export DONE_TXT_PATH="/path/to/done.txt"
 ```
 
 # Building
@@ -61,4 +61,3 @@ $ t ar
 ...
 # for more, read the dispatch function in Main.hs
 ```
-
