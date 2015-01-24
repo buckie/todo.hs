@@ -39,6 +39,7 @@ $ cabal install
 
 # Just Running it
 ```bash
+$ # after building it...
 $ cabal repl
 
 $ cabal run
