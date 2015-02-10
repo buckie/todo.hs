@@ -1,18 +1,20 @@
-import System.Environment (getArgs)
-import System.Process (runCommand)
+module Main where
 
-import Control.Monad (when)
+import           System.Environment (getArgs)
+import           System.Process     (runCommand)
 
-import Data.Char (toUpper)
+import           Control.Monad      (when)
 
-import TodoList.List (displayTodoList, displayOnlyTodos)
-import TodoList.Actions
+import           Data.Char          (toUpper)
 
-import TodoList.File
-import TodoList.Marshalling
-import TodoList.Utils
+import           List.Actions
+import           List.List          (displayOnlyTodos, displayTodoList)
 
-import FilePaths
+import           TodoFile
+import           Marshalling
+import           Utils
+
+import           FilePaths
 
 list :: IO ()
 list = do
@@ -100,8 +102,8 @@ dispatch :: [String] -> IO ()
 -- TODO: add CLI help!
 -- TODO: add -g override flag that forces using global todo.txt file path
 dispatch [] = list
-dispatch ("list":[]) = list
-dispatch ("ls":[]) = list
+dispatch ["list"] = list
+dispatch ["ls"] = list
 
 dispatch ("add":todo) = add $ unwords todo
 dispatch ("a":todo) = add $ unwords todo
@@ -127,25 +129,27 @@ dispatch ("app":textToAppend:tIDs) = append textToAppend $ map read tIDs
 dispatch ("remove":tIDs) = remove $ map (\tID -> read tID :: Int) tIDs
 dispatch ("rm":tIDs) = remove $ map read tIDs
 
-dispatch ("archive":[]) = archive
-dispatch ("arr":[]) = do
+dispatch ["archive"] = archive
+dispatch ["arr"] = do
   putStrLn $ colouredStr Yellow "☠ ☠ [Pirate Mode Enabled] ☠ ☠"
   putStrLn $ oldSalt ++ "Aye aye sir."
   putStrLn $ oldSalt ++ "You heard the Captain! Batten down the hatches, ye miserable scallywags"
   archive
   where oldSalt = colouredStr Yellow "old-salt: "
-dispatch ("ar":[]) = archive
+dispatch ["ar"] = archive
 
-dispatch ("edit":[]) = editTodoFile
-dispatch ("e":[]) = editTodoFile
+dispatch ["edit"] = editTodoFile
+dispatch ["e"] = editTodoFile
 
-dispatch (invalidCommand:[]) = putStrLn $ colouredStr Red $ "Command not recognized: " ++ invalidCommand
+dispatch [invalidCommand] = putStrLn $ colouredStr Red $ "Command not recognized: " ++ invalidCommand
 dispatch _ = putStrLn $ colouredStr Red "Command not recognized"
 
 main :: IO ()
 main = do
   args <- getArgs
   dispatch args
+
+
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -162,5 +166,4 @@ updateTodoFileWith updateF targetTodoIDs = do
       putStrLn $ "Todo(s) affected:\n" ++ displayOnlyTodos updatedTodoList
     Nothing -> do
       putStrLn $ displayTodoList oldTodos
-      putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoIDs
-
+      putStrLn $ colouredStr Red $ "Could not find todo(s): " ++ show targetTodoID

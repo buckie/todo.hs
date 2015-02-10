@@ -1,6 +1,6 @@
 module FilePaths
-( getTodoTxtFilePath
-, getDoneTxtFilePath
+( todoTxtFilePath
+, doneTxtFilePath
 ) where
 
 import System.Directory
@@ -12,18 +12,20 @@ localTodoTxtPath = "./todo.txt"
 localDoneTxtPath :: String
 localDoneTxtPath = "./done.txt"
 
--- FIXME: use a dotfile for the global Todo file paths
--- TODO: create a dotfile on first run
-getTodoTxtFilePath :: IO FilePath
-getTodoTxtFilePath = do
+todoTxtFilePath :: IO FilePath
+todoTxtFilePath = do
   localTodoFile <- doesFileExist localTodoTxtPath
+  -- FIXME: this should blow up if thre's no local todo.txt
+  --        AND no environment var
   if localTodoFile
     then return localTodoTxtPath
     else getEnv "TODO_TXT_PATH"
 
-getDoneTxtFilePath :: IO FilePath
-getDoneTxtFilePath = do
+doneTxtFilePath :: IO FilePath
+doneTxtFilePath = do
   localTodoFile <- doesFileExist localTodoTxtPath
+  -- FIXME: this should blow up if thre's no local todo.txt
+  --        AND no environment var
   if localTodoFile
      then return localDoneTxtPath
      else getEnv "DONE_TXT_PATH"

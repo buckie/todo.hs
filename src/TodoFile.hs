@@ -1,4 +1,4 @@
-module TodoList.File
+module TodoFile
 ( readTodoFile
 , updateTodoFile
 , appendTodoFile
@@ -7,8 +7,8 @@ module TodoList.File
 import System.IO (openTempFile, hPutStr, hClose, hPutStr)
 import System.Directory (removeFile, renameFile)
 
-import TodoList.List
-import TodoList.Marshalling
+import List.List
+import Marshalling
 
 readTodoFile :: FilePath -> IO TodoList
 readTodoFile todoFilePath = do

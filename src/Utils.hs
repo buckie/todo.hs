@@ -1,9 +1,9 @@
-module TodoList.Utils
+module Utils
 ( colouredStr
 , Color(..)
 ) where
 
-import System.Console.ANSI
+import           System.Console.ANSI
 
 colouredStr :: Color -> String -> String
 colouredStr colour str =

@@ -4,4 +4,5 @@
 (B) switch to getOpts for docs + better cmd line args parsing
 (C) fix `t edit` (funny chars?)
 (C) figure out how this file can be managed with t, while still being able to mess around with a sample
+ADD: -r option: recursevly scan folders till all todo.txts are found; cat them; display them unified
 push to hackage
