@@ -1,16 +1,17 @@
 module List.List
-( ID
-, Item(..)
-, List(..)
-, showBare
-, showBareList
-, fmapIf
-) where
+  ( ID
+  , Item(..)
+  , List(..)
+  , showBare
+  , showBareList
+  , fmapIf
+  ) where
 
 import qualified Data.Foldable as F
 
 type ID = Int
-data Item a = Item ID a deriving (Eq)
+
+data Item = Item ID a deriving (Eq)
 
 newtype List a = List [Item a]
 
@@ -24,7 +25,7 @@ fmapIf :: (Item a -> Bool) ->
 fmapIf p f id' i = if p i
                    then fmap f i
                    else fmap id' i
-  
+
 instance (Show a) => Show (Item a) where
   show (Item idx x) = show idx ++ " " ++ show x
 showBare :: (Show a) => Item a -> String
@@ -47,7 +48,7 @@ showBareList (List xs) = unlines $ map showBare xs
 instance F.Foldable List where
   -- foldr :: (a -> b -> b) -> b -> List a -> b
 --  foldr f z (List is) = foldr (\i z' -> fromItem $ (fromItem . fmap f) i (Item 0 z')) z is
-  foldr f z (List is) = foldr 
+  foldr f z (List is) = foldr
 
 fromItem :: Item a -> a
 fromItem (Item _ x) = x

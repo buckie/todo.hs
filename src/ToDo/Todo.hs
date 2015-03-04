@@ -48,11 +48,11 @@ unprioritise todo@(Todo text)
   | otherwise = Unchanged todo
   where priorityStrLength = 4
 
-        
+
 func :: Priority
 func arguments =
   case arguments of
-   
+
 
 prioritise :: Char -> Todo -> Result Todo
 prioritise priorityInput todo@(Todo text)
