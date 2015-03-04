@@ -1,4 +1,4 @@
-module List.Actions
+module ToDo.ListActions
 ( Result(..)
 , ListResult
 , updateItems
@@ -7,13 +7,7 @@ module List.Actions
 , fromResult
 ) where
 
-import           List.List
-
-data Result a = Updated a
-              | Unchanged a
-              | Removed a
-
-type ListResult a = ([Result a], List a)
+import ToDo.Types
 
 updateItems :: (Item a -> Item (Result a)) -> List a -> ListResult a
 updateItems f xs = (onlyUpdated, newList)
@@ -42,11 +36,6 @@ fromResult (Removed x) = x
 
 isPresent :: [ID] -> Item a -> Bool
 isPresent targetIDs (Item i _) = i `elem` targetIDs
-
-instance Functor Result where
-  fmap f (Updated x) = Updated $ f x
-  fmap f (Unchanged x) = Unchanged $ f x
-  fmap f (Removed x) = Removed $ f x
 
 isChanged :: Result a -> Bool
 isChanged (Unchanged _) = False

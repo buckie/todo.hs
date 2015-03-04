@@ -4,7 +4,7 @@
 -- TODO: fucking instance Serialiseable fucking Todo
 -- TODO: instance fucking Serialiseable fucking Result
 -- get rid of this
-module Marshalling
+module ToDo.Marshalling
 ( readTodoList
 , serialiseTodoList
 ) where
@@ -12,8 +12,8 @@ module Marshalling
 import qualified Data.Map   as Map
 import           Data.Maybe (fromMaybe)
 
-import           List.List
-import           Todo
+import           ToDo.Todo
+import           ToDo.Types
 
 blankLine :: String -> Bool
 blankLine = ([]==)

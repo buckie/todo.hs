@@ -1,4 +1,4 @@
-module Todo
+module ToDo.Todo
 ( Todo(..)
 
 , complete
@@ -17,15 +17,10 @@ module Todo
 import           Data.Char    (toUpper)
 import           Data.Maybe   (fromMaybe)
 
-import           List.Actions
-import           Utils
+import           ToDo.ListActions
+import           ToDo.Utils
 
-data Todo = Todo String deriving (Eq)
-
-
-data Priority = None
-              | Priority Char deriving (Eq)
-
+import           ToDo.Types
 -------------------------------------------------------------------------------
 -- Todo Action things
 -------------------------------------------------------------------------------

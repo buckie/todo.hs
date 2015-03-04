@@ -1,4 +1,4 @@
-module FilePaths
+module ToDo.FilePaths
 ( todoTxtFilePath
 , doneTxtFilePath
 ) where

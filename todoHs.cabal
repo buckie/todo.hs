@@ -15,12 +15,11 @@ executable t
   hs-source-dirs:      src
   main-is:             Main.hs
 
-  other-modules:       List.Actions
-                       List.List
-                       Marshalling
-                       TodoFile
-                       Todo
-                       Utils
+--  other-modules:       ToDo.List.Actions
+--                       ToDo.Marshalling
+--                       ToDo.TodoFile
+--                       ToDo.Todo
+--                       ToDo.Utils
 
   build-depends:       base >=4.7 && <4.8,
                        directory >=1.2 && <1.3,

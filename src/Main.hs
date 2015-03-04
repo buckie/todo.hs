@@ -7,14 +7,13 @@ import           Control.Monad      (when)
 
 import           Data.Char          (toUpper)
 
-import           List.Actions
-import           List.List          (displayOnlyTodos, displayTodoList)
+import           ToDo.ListActions
 
-import           TodoFile
-import           Marshalling
-import           Utils
+import           ToDo.TodoFile
+import           ToDo.Marshalling
+import           ToDo.Utils
 
-import           FilePaths
+import           ToDo.FilePaths
 
 list :: IO ()
 list = do

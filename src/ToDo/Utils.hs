@@ -1,7 +1,7 @@
-module Utils
-( colouredStr
-, Color(..)
-) where
+module ToDo.Utils
+  ( colouredStr
+  , Color(..)
+  ) where
 
 import           System.Console.ANSI
 
